@@ -14,6 +14,62 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import java.util.List;
 
+// TODO:
+
+// Big functions:
+// Porn detection
+// URL redirection
+// Real-time updates
+
+// CURRENTLY::
+
+// App xml file and interface
+// MyAccessibilityService.java - URL check and redirect, URL capturing in a different file
+// Some java class that handles the saving and reloading of the links to sharedprefs (how about firestore, for money lol ?)
+// A class that describes each redirect link object
+// A class, linkAdapter, that handles the list populating and operations
+// RE: I don't know how to do this
+
+// OTHER
+// o onInstalled, open intro youtube video and how to use page
+
+// WRAP UP
+// o Refactor me pleaseeeee (hash maps???)
+// o ???
+// –––
+// o Finish this checklist
+// Mockups of the app (we aren't doing a chrX anymore...new approach to design)
+// o When I click on a list item, I should go to a new website
+// o When I click the website, I should go to the website url that is in the name
+// o Opening links shouldn't hijack me out of my current window
+// o Enable random selection from list of links to open when visiting a porn site
+// o The data should persist
+// o I should be able to delete urls
+// o Rotate the text in the url input to display ideas and inspiration for users
+// o I must screen the input links so that the user experience will be seamless and great
+// o What happens when a person inputs a banned link into the redirect url list???
+// o Instruct users to enable the extension in incognito upon download
+// o Allow users to add local files as well
+// o Open a survey when app is deleted (how ?)
+// o I should be able to add urls with custom names (titles seperate from the links)
+// o use keyword analysis to determine if a website is adult upon visit so that i
+//    can finally stop having to look at porn sites
+// o Enable realtime updates of banned urls through Firebase
+// o The links should be written to a personal database (Firebase DB) for me to screen
+// o Test sync persistence between updates and diff machines https://developer.chrome.com/apps/storage
+// o Add an "emergency button" where ALL LINKS and QUALITY EDUCATION are opened
+// o Screen all inputted redirect urls with the realtime urls
+//   If any are of illegal domains, delete them
+// o Explain what data I do and don't collect
+// o How to ensure people open the popup long enough for firebase to work....?
+// o There must be a "how to use" section in the popup and another "about PorNo!" site -- implement
+// o Add links to quality education
+// o Add a place to contact me about links that bypass the filter and other issues in the popup
+// o Add link to  a quiz in the popup
+// o Publish
+// o marquee and promo photos
+// o Make a how-to youtube video / trailer
+
 
 // BIG THANK YOUs TO https://stackoverflow.com/questions/38783205/android-read-google-chrome-url-using-accessibility-service
 // and https://stackoverflow.com/questions/42125940/how-to-use-accessibility-services-for-taking-action-for-users
