@@ -1,6 +1,7 @@
 package us.mrvivacio.porno;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -50,7 +51,6 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS), 1);
     }
 
-
     // Attaches a long click listener
     private void setupListViewListener() {
         lvItems.setOnItemLongClickListener(
@@ -69,6 +69,21 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
         );
+        lvItems.setOnItemClickListener(
+                new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
+                        // Get the text value of the clicked item and parse the url
+                        String text = items.get(pos);
+                        int idxPipe = text.indexOf('|');
+                        String url = text.substring(0, idxPipe - 1);
+
+                        // Open the url
+                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                        startActivity(browserIntent);
+                    }
+                }
+        );
     }
 
     public void onAddItem(View v) {
@@ -77,6 +92,15 @@ public class MainActivity extends AppCompatActivity {
 
         String urlText = url.getText().toString().trim();
         String nameText = name.getText().toString().trim();
+
+        if (urlText.length() < 1) {
+            // No link? No action
+            return;
+        }
+        else if (nameText.length() < 1) {
+            // No name provided? Use the url as the name
+            nameText = urlText;
+        }
 
         urlText += " | " + nameText;
 
@@ -109,5 +133,4 @@ public class MainActivity extends AppCompatActivity {
             ioe.printStackTrace();
         }
     }
-
 }

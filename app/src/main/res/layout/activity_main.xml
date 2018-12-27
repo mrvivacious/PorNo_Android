@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/tv_msg"
         android:textAlignment="center"
-        android:text="Let's say no to porno, together!"
+        android:text="Let's say no to porno, together! (long press delete, short press go to url)"
         android:textColor="@android:color/black"
         android:background="@color/colorAccent"/>
 
