@@ -2,6 +2,7 @@ package us.mrvivacio.porno;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.nfc.Tag;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "dawg";
     private ArrayList<String> items;
     private ArrayAdapter<String> itemsAdapter;
     private ListView lvItems;
@@ -47,7 +49,9 @@ public class MainActivity extends AppCompatActivity {
         setupListViewListener();
     }
 
-    public void onEnableAccClick(View view) {
+    // This method opens the accessibility screen
+    public void onEnableAccClick() {
+        Log.d(TAG, "onEnableAccClick: we in here");
         startActivityForResult(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS), 1);
     }
 
@@ -77,6 +81,7 @@ public class MainActivity extends AppCompatActivity {
                         String text = items.get(pos);
                         int idxPipe = text.indexOf('|');
                         String url = text.substring(0, idxPipe - 1);
+
 
                         // Open the url
                         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
