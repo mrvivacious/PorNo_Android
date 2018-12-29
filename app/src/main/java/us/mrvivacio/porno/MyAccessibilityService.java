@@ -41,7 +41,7 @@ public class MyAccessibilityService extends AccessibilityService {
         // Of those events, search for url as quickly as possible
 
         if (event.getPackageName() != null && event.getPackageName().toString().contains("com.android.chrome")) {
-
+            time = System.currentTimeMillis();
 
             // Let's first experiment with WINDOW tags
             // The user opens a URL from a different source (ie hyperlink, URL in SMS message...)
@@ -83,7 +83,16 @@ public class MyAccessibilityService extends AccessibilityService {
                     if (nodeInfo.contains("@75")) {
                         Log.d(TAG, "onAccessibilityEvent TEXT__: src.NodeInfo = " + nodeInfo);
                         Log.d(TAG, "onAccessibilityEvent: TEXT__: event.getTxt = " + event.getText());
-                        dfs(src);
+
+                        if (event.getText().toString().contains("yahoo.com")) {
+                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("about:blank"));
+                            intent.putExtra(Browser.EXTRA_APPLICATION_ID, "com.android.chrome");
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+
+                            Log.d(TAG, "dfs: Speed = " + (System.currentTimeMillis() - time));
+                        }
+//                        dfs(src);
                     }
                 }
             }
@@ -163,7 +172,7 @@ public class MyAccessibilityService extends AccessibilityService {
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);
 
-
+                      Log.d(TAG, "dfs: Speed = " + (System.currentTimeMillis() - time));
                     return;
 //                }
             }
