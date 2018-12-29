@@ -25,6 +25,8 @@ import java.util.List;
 // and https://stackoverflow.com/questions/42125940/how-to-use-accessibility-services-for-taking-action-for-users
 public class MyAccessibilityService extends AccessibilityService {
     static String TAG = "dawgAccessibility";
+    private long time;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -38,49 +40,103 @@ public class MyAccessibilityService extends AccessibilityService {
         // Let's make the number of events we have to search as small as possible
         // Of those events, search for url as quickly as possible
 
-        if (eventType.contains("VIEW_TEXT")) {
-//            Log.d(TAG, "oAE: event = " + event);
-//            Log.d(TAG, "oAE: event.PackageName = " + event.getPackageName());
-//            Log.d(TAG, "oAE: event.Text = " + event.getText());
+        if (event.getPackageName() != null && event.getPackageName().toString().contains("com.android.chrome")) {
 
-            // User is using Google Chrome
-            if (event.getPackageName().toString().contains("com.android.chrome")) {
-//                Log.d(TAG, "oAE: We are inside chrome");
-//                Log.d(TAG, "oAE: eventType = " + event);
 
-                String eventText = event.getText().toString();
-                // Search for url as quickly as possible
-                // !! This will evaluate to true even if the user just types a URL
-                //  in any text field beyond the omnibox...
-                // Todo: How to parse strictly just the omnibox?
-//                if (eventText.contains("https://") || eventText.contains("http://")) {
-                    Log.d(TAG, "oAE: we have a url: " + eventText);
-                    // Is the url banned (ie equals yahoo.com)?
-                    if (eventText.contains("yahoo.com")) {
-                        // If the url is banned,
-                        // Redirect the user
+            // Let's first experiment with WINDOW tags
+            // The user opens a URL from a different source (ie hyperlink, URL in SMS message...)
+            if (eventType.contains("WINDOW")) {
+                AccessibilityNodeInfo src = event.getSource();
 
-                        long old = System.currentTimeMillis();
-//                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("about:blank"));
-                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/mrvivacious"));
-                        intent.putExtra(Browser.EXTRA_APPLICATION_ID, "com.android.chrome");
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
+                // Nothin 2 do
+                if (src == null) {
+                    // Do nothing
+                }
+                // We have a source, so we can query
+                else {
+                    // Get the nodeInfo of the sender of this event
+                    String nodeInfo = src.toString().substring(48, src.toString().indexOf(';'));
 
-                        Log.d(TAG, "oAE: Speed = " + (System.currentTimeMillis() - old));
-//                    }
+                    // The nodeId of the Chrome omnibox seems to begin with this for WINDOW events
+                    // Save cycles by DFSing only on the events directly from the omnibox
+                    if (nodeInfo.contains("@80006")) {
+                        Log.d(TAG, "onAccessibilityEvent: src.NodeInfo = " + nodeInfo);
+                        dfs(src);
+                    }
                 }
             }
+            // If the user is typing in the omnibox,
+            else if (eventType.contains("TEXT")) {
+                AccessibilityNodeInfo src = event.getSource();
 
-            // User is using Samsung Internet
-            else if (event.getPackageName().toString().contains("com.sec.android.app.sbrowser")) {
-                // implement()
+                // Nothin 2 do
+                if (src == null) {
+                    // Do nothing
+                }
+                // We have a source, so we can query
+                else {
+                    // Get the nodeInfo of the sender of this event
+                    String nodeInfo = src.toString().substring(48, src.toString().indexOf(';'));
+
+                    // The nodeId of the Chrome omnibox seems to begin with this for TEXT events
+                    // Save cycles by DFSing only on the events directly from the omnibox
+                    if (nodeInfo.contains("@75")) {
+                        Log.d(TAG, "onAccessibilityEvent TEXT__: src.NodeInfo = " + nodeInfo);
+                        Log.d(TAG, "onAccessibilityEvent: TEXT__: event.getTxt = " + event.getText());
+                        dfs(src);
+                    }
+                }
             }
-
         }
 
+
+        // The following statements perform URL detection ONLY when the user is TYPING the
+        //  URL into the omnibox
+        // How to detect that we have visited a URL from a hyperlink
+        // Todo: typing the url will redirect, but opening the url from a hyperlink does not trigger!
+//        if (eventType.contains("VIEW_TEXT")) {
+////            Log.d(TAG, "onAccessibilityEvent: event = " + event);
+////            Log.d(TAG, "onAccessibilityEvent: event.PackageName = " + event.getPackageName());
+////            Log.d(TAG, "onAccessibilityEvent: event.Text = " + event.getText());
+//
+//            // User is using Google Chrome
+//            if (event.getPackageName().toString().contains("com.android.chrome")) {
+////                Log.d(TAG, "onAccessibilityEvent: We are inside chrome");
+////                Log.d(TAG, "onAccessibilityEvent: eventType = " + event);
+//
+//                String eventText = event.getText().toString();
+//                // Search for url as quickly as possible
+//                // !! This will evaluate to true even if the user just types a URL
+//                //  in any text field beyond the omnibox...
+//                // Todo: How to parse strictly just the omnibox?
+////                if (eventText.contains("https://") || eventText.contains("http://")) {
+//                    Log.d(TAG, "onAccessibilityEvent: we have a url: " + eventText);
+//                    // Is the url banned (ie equals yahoo.com)?
+//                    if (eventText.contains("yahoo.com")) {
+//                        // If the url is banned,
+//                        // Redirect the user
+////                        Log.d(TAG, "onAccessibilityEvent: event.getSource = " + event.getSource().getViewIdResourceName().toString());
+//
+//                        long old = System.currentTimeMillis();
+////                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("about:blank"));
+//                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/mrvivacious"));
+//                        intent.putExtra(Browser.EXTRA_APPLICATION_ID, "com.android.chrome");
+//                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                        startActivity(intent);
+//
+//                        Log.d(TAG, "onAccessibilityEvent: Speed = " + (System.currentTimeMillis() - old));
+////                    }
+//                }
+//            }
+//
+//            // User is using Samsung Internet
+//            else if (event.getPackageName().toString().contains("com.sec.android.app.sbrowser")) {
+//                // implement()
+//            }
+//        }
+
 //        if (eventType.contains("WINDOW")) {
-//            Log.d(TAG, "oAE: CONTAINS WINDOWWWWWW");
+//            Log.d(TAG, "onAccessibilityEvent: CONTAINS WINDOWWWWWW");
 //
 //            AccessibilityNodeInfo nodeInfo = event.getSource();
 ////            Log.d(TAG, "onAccessibilityEvent: info.getChildCount() = " + nodeInfo.getChildCount());
@@ -97,15 +153,24 @@ public class MyAccessibilityService extends AccessibilityService {
             String txt = info.getText().toString();
             txt = txt.toLowerCase();
 
-            // Look for all urls
-            if (txt.contains("http")) {
-                Log.d(TAG, "dfs: our url is " + txt);
-                return;
+            // Look for only URL
+            if (txt.contains("yahoo.com")) {
+//                if (txt.contains("http") || txt.contains("www")) {
+                    Log.d(TAG, "dfs: one text is " + txt);
+
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("about:blank"));
+                    intent.putExtra(Browser.EXTRA_APPLICATION_ID, "com.android.chrome");
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+
+
+                    return;
+//                }
             }
         }
 
         for (int i = 0 ; i < info.getChildCount(); i++) {
-            Log.d(TAG, "onAccessibilityEvent: Iteration " + i + "/" + info.getChildCount());
+//            Log.d(TAG, "onAccessibilityEvent: Iteration " + i + "/" + info.getChildCount());
 
             AccessibilityNodeInfo child = info.getChild(i);
             dfs(child);
