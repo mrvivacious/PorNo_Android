@@ -15,6 +15,8 @@ import java.util.Map;
 public class porNo {
     private static String TAG = "dawg";
 
+    // read me https://stackoverflow.com/questions/4833480/have-i-reached-the-limits-of-the-size-of-objects-javascript-in-my-browser-can-ha
+
 
     /*
      * Function isPorn
@@ -26,9 +28,9 @@ public class porNo {
     public static boolean isPorn(String url) {
         // Strip mobile. or m.
         int stop = url.length();
-        url = url.trim();
+        url = url.trim().toLowerCase();
 
-        if (url == null || url.length() < 1) {
+        if (url.length() < 1) {
             return false;
         }
 
@@ -40,6 +42,8 @@ public class porNo {
             return false;
         }
 
+
+
         // Avoid fightthenewdrug and github
         if (!url.contains("fightthenewdrug") && !url.contains("github")) {
             Log.d(TAG, "isPorn: URL = " + url);
@@ -48,7 +52,7 @@ public class porNo {
             for (int i = 0; i < pornLinks.length; i++) {
                 if (url.contains(pornLinks[i])) {
                     // GET THE FUCK OUTTTTTTTTTTTTTTT
-                    Log.d(TAG, "isPorn: TRUE");
+//                    Log.d(TAG, "isPorn: TRUE");
 
                     return true;
                 }
