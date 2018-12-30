@@ -4,13 +4,65 @@
 
 package us.mrvivacio.porno;
 
+import android.content.Intent;
+import android.net.Uri;
+import android.provider.Browser;
+import android.util.Log;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class porNo {
-    static String [] pornLinks = {
+    private static String TAG = "dawg";
+
+
+    /*
+     * Function isPorn
+     * UNREFINED !! put me in another dedicated class of my own pleaseeeee
+     * Checks only if the url contains any mention of a porn url
+     * Ya boi Vivek out here writing a porn filter part 2!!!!!!!!!
+     * @param url The url whose domain name we check against the porn sites
+     */
+    public static boolean isPorn(String url) {
+        // Strip mobile. or m.
+        int stop = url.length();
+        url = url.trim();
+
+        if (url == null || url.length() < 1) {
+            return false;
+        }
+
+        if (url.contains(" ")) {
+            return false;
+        }
+
+        if (!url.contains(".")) {
+            return false;
+        }
+
+        // Avoid fightthenewdrug and github
+        if (!url.contains("fightthenewdrug") && !url.contains("github")) {
+            Log.d(TAG, "isPorn: URL = " + url);
+
+            // O(n) worst case feels bad but whO(l)esome porn-checker feels good
+            for (int i = 0; i < pornLinks.length; i++) {
+                if (url.contains(pornLinks[i])) {
+                    // GET THE FUCK OUTTTTTTTTTTTTTTT
+                    Log.d(TAG, "isPorn: TRUE");
+
+                    return true;
+                }
+            }
+        }
+
+        // Inconclusive
+        return false;
+    }
+
+
+    private static String [] pornLinks = {
         ".xxx",".adult",".porn","anissa-kate","anissakate","manyvids",
-        ".sex","jizzman.com","tube8","barelist.com", "hugesex.tv","xnxx.com",
+        ".sex","jizzman.com","tube8","barelist.com", "hugesex.tv", "hugesex.tv/en/","xnxx.com",
         "pornhub.com","youporn.com","thefappening.pro","lezbiyenporno.org",
         "godfatherporn.com","hotgirlclub.com","m.perfectgirls.net","mikeinbrazil.com",
         "nitroflare-porn.com","pornfack.com","porngals4.com","pornve.com","pornzog.com",

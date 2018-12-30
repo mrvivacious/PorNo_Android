@@ -16,9 +16,7 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Time;
 import java.util.ArrayList;
-import java.util.List;
 
 
 // BIG THANK YOUs TO https://stackoverflow.com/questions/38783205/android-read-google-chrome-url-using-accessibility-service
@@ -35,39 +33,61 @@ public class MyAccessibilityService extends AccessibilityService {
 
     // https://stackoverflow.com/questions/38783205/android-read-google-chrome-url-using-accessibility-service
     public void onAccessibilityEvent(AccessibilityEvent event) {
-        String eventType = AccessibilityEvent.eventTypeToString(event.getEventType());
         // Faster way to search events for porn url?
         // Let's make the number of events we have to search as small as possible
         // Of those events, search for url as quickly as possible
 
         if (event.getPackageName() != null && event.getPackageName().toString().contains("com.android.chrome")) {
-            time = System.currentTimeMillis();
+            String eventType = AccessibilityEvent.eventTypeToString(event.getEventType());
 
-            // Let's first experiment with WINDOW tags
+//            time = System.currentTimeMillis();
+
             // The user opens a URL from a different source (ie hyperlink, URL in SMS message...)
             if (eventType.contains("WINDOW")) {
-                AccessibilityNodeInfo src = event.getSource();
+                String className = event.getClassName().toString();
 
-                // Nothin 2 do
-                if (src == null) {
-                    // Do nothing
+//                Log.d(TAG, "onAccessibilityEvent: event.class = " + event.getClassName());
+                Log.d(TAG, "onAccessibilityEvent: className = " + className);
+
+                // No null check cuz event.getClassName() will never return null...thank you Android <3
+                Log.d(TAG, "onAccessibilityEvent: className = " + className);
+
+                // 6 out of 6
+
+                // $$ Clicking a hyperlink on a webpage
+                // $$ Navigating using Android back button
+                // $$ Navigating using Chrome forward navigation button
+                if (className.equals("android.widget.EditText")) {
+//                    // do nothing
+//                    Log.d(TAG, "onAccessibilityEvent: event = " + event);
+//
+                    dfs(event.getSource());
                 }
+
+                // $$ Hyperlink from external source, such as an sms msg
+                if (className.equals("org.chromium.chrome.browser.ChromeTabbedActivity")) {
+//                    Log.d(TAG, "onAccessibilityEvent: event = " + event);
+//
+//                    dfs(event.getSource());
+                }
+
+                // $$ Typing the URL in
+                // $$ Pasting the URL in
                 // We have a source, so we can query
-                else {
-                    // Get the nodeInfo of the sender of this event
-                    String nodeInfo = src.toString().substring(48, src.toString().indexOf(';'));
+                // Omnibox sits in the class android.widget.ListView
+                // We specify this class because a porn URL embedded in a webpage (even as just plaintext) will trigger
+                //  the redirect. However! Webpage data is in the class android.widget.FrameLayout, so we can avoid that class
+                if (className.equals("android.widget.ListView")){
+                    // Trying to use the nodeID won't work -- the ids keep changing (probably for good reason)
+                    // So much for saving cycles -- just check all window events, sorry phone
 
-                    // The nodeId of the Chrome omnibox seems to begin with this for WINDOW events
-                    // Save cycles by DFSing only on the events directly from the omnibox
-                    if (nodeInfo.contains("@80006")) {
-                        Log.d(TAG, "onAccessibilityEvent: src.NodeInfo = " + nodeInfo);
-
-                        // Can't use .getText() strategy -- WINDOW event metadata doesn't contain URL info
-                        //  when opened through hyperlinks therefore dfs() we go
-                        dfs(src);
-                    }
+                    // Can't use .getText() strategy -- WINDOW event metadata doesn't contain URL info
+                    //  when opened through hyperlinks therefore dfs() we go
+//                    dfs(event.getSource());
                 }
+
             }
+
             // If the user is typing in the omnibox,
             // TODO: Add handling to ensure the URL found is the omnibox...the resource id keeps changing UGHHHHHHHH
 //            else if (eventType.contains("TEXT")) {
@@ -119,10 +139,40 @@ public class MyAccessibilityService extends AccessibilityService {
         if (info.getText() != null && info.getText().length() > 0) {
             String txt = info.getText().toString();
             txt = txt.toLowerCase();
+            Log.d(TAG, "dfs: the text is " + txt);
+
+
+//            if (txt.equals("about:blank")) {
+//                Log.d(TAG, "dfs: it g ma");
+//
+//                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(getRandomURL()));
+//                intent.putExtra(Browser.EXTRA_APPLICATION_ID, "com.android.chrome");
+//                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                startActivity(intent);
+//            }
 
             // Is the txt a banned URL?
-            if (isPorn(txt)) {
+//            if (porNo.isPorn(txt)) {
+            if (txt.equals("yahoo.com")) {
                     Log.d(TAG, "dfs: the text is " + txt);
+
+                    // Attempting direct redirection
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(getRandomURL()));
+//                    intent.putExtra(Browser.EXTRA_APPLICATION_ID, "com.android.chrome");
+//                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                    startActivity(intent);
+
+//                    // will this open in the current tab -- yes, but not before the porn site finishes loading smh
+//                    // about:blank can be thought of as window.stop()
+//                    // Thank you, https://android.stackexchange.com/questions/189074/android-chrome-browser-how-to-make-it-always-open-to-blank-page-and-new-tab-o
+                    // First, we "stop" the page load of the porn site....
+                // Why is hugesex.tv so fucking fast wtffffff
+                // Todo: Clicking the back button to visit a porn site completely bypasses our url detection
+//                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("about:blank"));
+                    intent.putExtra(Browser.EXTRA_APPLICATION_ID, "com.android.chrome");
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+
 
 //                    Log.d(TAG, "dfs: Speed = " + (System.currentTimeMillis() - time));
                     return;
@@ -134,6 +184,7 @@ public class MyAccessibilityService extends AccessibilityService {
 //            Log.d(TAG, "onAccessibilityEvent: Iteration " + i + "/" + info.getChildCount());
 
             AccessibilityNodeInfo child = info.getChild(i);
+
             dfs(child);
 
             if (child != null) {
@@ -146,7 +197,7 @@ public class MyAccessibilityService extends AccessibilityService {
         File filesDir = getFilesDir();
         ArrayList<String> items;
 
-        Log.d("dawg", filesDir.toString());
+//        Log.d("dawg", filesDir.toString());
         File todoFile = new File(filesDir, "todo.txt");
 
         // Get our saved urls
@@ -156,7 +207,7 @@ public class MyAccessibilityService extends AccessibilityService {
             return "https://fightthenewdrug.com";
         }
 
-        Log.d("dawg", items.toString());
+//        Log.d("dawg", items.toString());
 
 
         // Select a url at random and parse it
@@ -171,47 +222,6 @@ public class MyAccessibilityService extends AccessibilityService {
         return url;
     }
 
-    // Function isPorn
-    // UNREFINED !! put me in another dedicated class of my own pleaseeeee
-    // Checks only if the url contains any mention of a porn url
-    // Ya boi Vivek out here writing a porn filter part 2!!!!!!!!!
-    // @param url The url whose domain name we check against the porn sites
-    public boolean isPorn(String url) {
-        // Strip mobile. or m.
-        int stop = url.length();
-        url = url.trim();
-
-        if (url.contains(" ") || !url.contains(".")) {
-            return false;
-        }
-
-        // Avoid fightthenewdrug and github
-        if (!url.contains("fightthenewdrug") && !url.contains("github")) {
-            Log.d(TAG, "isPorn: URL = " + url);
-
-            // O(n) worst case feels bad but whO(l)esome porn-checker feels good
-            for (int i = 0; i < porNo.pornLinks.length; i++) {
-                if (url.contains(porNo.pornLinks[i])) {
-                    // GET THE FUCK OUTTTTTTTTTTTTTTT
-                    Log.d(TAG, "isPorn: TRUE");
-
-                    // will this open in the current tab -- yes, but not before the porn site finishes loading smh
-                    // about:blank can be thought of as window.stop()
-                    // Thank you, https://android.stackexchange.com/questions/189074/android-chrome-browser-how-to-make-it-always-open-to-blank-page-and-new-tab-o
-                    // First, we "stop" the page load of the porn site....
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("about:blank"));
-                    intent.putExtra(Browser.EXTRA_APPLICATION_ID, "com.android.chrome");
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
-
-                    return true;
-                }
-            }
-        }
-
-        // Inconclusive
-        return false;
-    }
 
     @Override
     public void onInterrupt() {
