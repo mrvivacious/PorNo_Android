@@ -26,7 +26,6 @@ import java.util.ArrayList;
 public class MyAccessibilityService extends AccessibilityService {
     static String TAG = "dawgAccessibility";
     private String omnibox = "zz";
-    private String lvId = "zz";
     private long time;
 
     @Override
@@ -35,6 +34,7 @@ public class MyAccessibilityService extends AccessibilityService {
         Log.d("MyAccessibilityService", "onCreate");
     }
 
+    // todo why the fuck does my github porNo.js page keep crashing
     // https://stackoverflow.com/questions/38783205/android-read-google-chrome-url-using-accessibility-service
     public void onAccessibilityEvent(AccessibilityEvent event) {
 //        Log.d(TAG, "onAccessibilityEvent: event = " + event);
@@ -71,7 +71,9 @@ public class MyAccessibilityService extends AccessibilityService {
                 if (className.equals("android.widget.EditText")) {
 ////                    // do nothing
 
+//                    Log.d(TAG, "onAccessibilityEvent: inside ET $$$$$$");
                     dfs(event.getSource());
+                    
                 }
 
                 // $$ ^^ Hyperlink from external source, such as an sms msg (Can't test for incognito -- no
@@ -97,18 +99,6 @@ public class MyAccessibilityService extends AccessibilityService {
                     // Can't use .getText() strategy -- WINDOW event metadata doesn't contain URL info
                     //  when opened through hyperlinks therefore dfs() we go
                     dfs(event.getSource());
-
-                    // cuz omni not needed to evaluate just text
-                    if (event.getSource() != null) {
-                        String src = event.getSource().toString();
-                        String current = getId(src);
-
-                        // Save ID of URL suggestion list
-                        if (!lvId.equals(current)) {
-                            Log.d(TAG, "onAccessibilityEvent: UPDATE lvId -- " + current);
-                            lvId = current;
-                        }
-                    }
                 }
             }
 
@@ -121,9 +111,13 @@ public class MyAccessibilityService extends AccessibilityService {
                 }
                 // We have some text!
                 else {
+                    while (text.contains(" ")) {
+                        text = text.replaceAll(" ", "");
+                    }
+
                     Log.d(TAG, "onAccessibilityEvent: our text is " + text);
 
-                    if (porNo.isPorn(text)) {
+                    if (porNo.isPornDomain(text)) {
                         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(getRandomURL()));
                         intent.putExtra(Browser.EXTRA_APPLICATION_ID, "com.android.chrome");
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -138,20 +132,19 @@ public class MyAccessibilityService extends AccessibilityService {
                         String src = event.getSource().toString();
                         String current = getId(src);
 
-                        Log.d(TAG, "onAccessibilityEvent: current = " + current);
+//                        Log.d(TAG, "onAccessibilityEvent: current = " + current);
 
                         // Save ID of omnibox
                         if (!omnibox.equals(current)) {
-                            Log.d(TAG, "onAccessibilityEvent: UPDATE -- " + omnibox);
+//                            Log.d(TAG, "onAccessibilityEvent: UPDATE -- " + omnibox);
                             omnibox = current;
                         }
 
-                        Log.d(TAG, "onAccessibilityEvent: from TYPE_VIEW_TEXT: " + event.getSource());
+//                        Log.d(TAG, "onAccessibilityEvent: from TYPE_VIEW_TEXT: " + event.getSource());
                     }
                 }
             }
         }
-
 
 //
 //            // User is using Samsung Internet
@@ -181,16 +174,17 @@ public class MyAccessibilityService extends AccessibilityService {
                 return;
             }
 
+            // Ensure we only check the omnibox
             // If omnibox is zz, it's uninitialized, so proceed with dfs
-            // Otherwise, we have a value for omnibox, so do evaluate this statement
+            // Otherwise, we have a value for omnibox, so this evaluates
+            //  to true when we have a node that isn't the omnibox
             if (!omnibox.equals("zz") && !getId(info.toString()).equals(omnibox)) {
-                Log.d(TAG, "dfs: rip... info:omnibox = " + getId(info.toString()) + " : " + omnibox);
+//                Log.d(TAG, "dfs: rip... info:omnibox = " + getId(info.toString()) + " : " + omnibox);
 
                 return;
             }
 
             Log.d(TAG, "dfs: the URL is " + txt);
-
 
             // Is the txt a banned URL?
             if (porNo.isPorn(txt)) {
@@ -200,16 +194,14 @@ public class MyAccessibilityService extends AccessibilityService {
 
                     // Attempting direct redirection
                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(getRandomURL()));
-//                    intent.putExtra(Browser.EXTRA_APPLICATION_ID, "com.android.chrome");
-//                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                    startActivity(intent);
 
-//                    // will this open in the current tab -- yes, but not before the porn site finishes loading smh
-//                    // about:blank can be thought of as window.stop()
-//                    // Thank you, https://android.stackexchange.com/questions/189074/android-chrome-browser-how-to-make-it-always-open-to-blank-page-and-new-tab-o
+                    // Will this open in the current tab -- yes, but not before the porn site finishes loading smh
+                    // about:blank can be thought of as window.stop()
+                    // Thank you, https://android.stackexchange.com/questions/189074/android-chrome-browser-how-to-make-it-always-open-to-blank-page-and-new-tab-o
                     // First, we "stop" the page load of the porn site....
                 // Why is hugesex.tv so fucking fast wtffffff
                 // Todo: Clicking the back button to visit a porn site completely bypasses our url detection
+                // fuck u stop watching porn >:(
 //                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("about:blank"));
                     intent.putExtra(Browser.EXTRA_APPLICATION_ID, "com.android.chrome");
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -237,12 +229,16 @@ public class MyAccessibilityService extends AccessibilityService {
         }
     }
 
+    /*
+     * Get the associated nodeId of the passed in event source
+     */
     public String getId(String src) {
         int start = src.indexOf("@");
         int stop = src.indexOf(";");
         
         return src.substring(start, stop);
     }
+
 
     public String getRandomURL() {
         File filesDir = getFilesDir();
@@ -272,14 +268,6 @@ public class MyAccessibilityService extends AccessibilityService {
 
         return url;
     }
-
-//    // Thank you, https://stackoverflow.com/questions/11182703/check-if-back-key-was-pressed-in-android
-//    public boolean onKeyDown(int keyCode, KeyEvent event) {
-//        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
-//
-//        }
-//        return super.onKeyDown(keyCode, event);
-//    }
 
 
     @Override
