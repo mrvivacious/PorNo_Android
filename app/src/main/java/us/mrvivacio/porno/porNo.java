@@ -78,7 +78,7 @@ public class porNo {
         // ie trying to look at porNo.js on my Github shouldn't trigger lmao
         if (    url.contains("fightthenewdrug") ||
                 url.contains("github") ||
-                url.contains("chrome.google")   ) {
+                url.contains("chrome")   ) {
             return false;
         }
 

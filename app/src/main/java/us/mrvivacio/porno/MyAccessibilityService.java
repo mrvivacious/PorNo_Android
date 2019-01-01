@@ -1,5 +1,9 @@
 // PorNo! Android
+//
 // MyAccessibilityService.java
+// This file handles the reception of Accessibility events
+// We analyze the events related to web-browsing and text-editing for any sign of porn
+//
 // @author Vivek Bhookya
 
 package us.mrvivacio.porno;
@@ -9,7 +13,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.provider.Browser;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
@@ -17,9 +20,10 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 
+// Todo:
+// "chrome://bookmarks" triggers redirection | RE: it wasn't chrome://bookmarks, it was the URL to Chrome PorNo! lmao
 
 // BIG THANK YOUs TO https://stackoverflow.com/questions/38783205/android-read-google-chrome-url-using-accessibility-service
 // and https://stackoverflow.com/questions/42125940/how-to-use-accessibility-services-for-taking-action-for-users
@@ -34,7 +38,7 @@ public class MyAccessibilityService extends AccessibilityService {
         Log.d("MyAccessibilityService", "onCreate");
     }
 
-    // todo why the fuck does my github porNo.js page keep crashing
+    // todo why the fuck does my github porNo.js page crash whenever it wants to
     // https://stackoverflow.com/questions/38783205/android-read-google-chrome-url-using-accessibility-service
     public void onAccessibilityEvent(AccessibilityEvent event) {
 //        Log.d(TAG, "onAccessibilityEvent: event = " + event);
@@ -73,7 +77,6 @@ public class MyAccessibilityService extends AccessibilityService {
 
 //                    Log.d(TAG, "onAccessibilityEvent: inside ET $$$$$$");
                     dfs(event.getSource());
-                    
                 }
 
                 // $$ ^^ Hyperlink from external source, such as an sms msg (Can't test for incognito -- no
