@@ -46,7 +46,7 @@ public class porNo {
 
         // Avoid fightthenewdrug and github
         if (!url.contains("fightthenewdrug") && !url.contains("github")) {
-            Log.d(TAG, "isPorn: URL = " + url);
+//            Log.d(TAG, "isPorn: URL = " + url);
 
             // O(n) worst case feels bad but whO(l)esome porn-checker feels good
             for (int i = 0; i < pornLinks.length; i++) {
