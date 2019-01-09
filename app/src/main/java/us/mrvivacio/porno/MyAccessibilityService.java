@@ -20,7 +20,11 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 // Todo:
 // "chrome://bookmarks" triggers redirection | RE: it wasn't chrome://bookmarks, it was the URL to Chrome PorNo! lmao
@@ -28,6 +32,8 @@ import java.util.ArrayList;
 // BIG THANK YOUs TO https://stackoverflow.com/questions/38783205/android-read-google-chrome-url-using-accessibility-service
 // and https://stackoverflow.com/questions/42125940/how-to-use-accessibility-services-for-taking-action-for-users
 public class MyAccessibilityService extends AccessibilityService {
+    static Map<String, Boolean> dict2 = new HashMap<String, Boolean>();;
+
     static String TAG = "dawgAccessibility";
     private String omnibox = "zz";
     private long time;
@@ -35,7 +41,12 @@ public class MyAccessibilityService extends AccessibilityService {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d("MyAccessibilityService", "onCreate");
+        Log.d(TAG, "onCreate: ATTEMPTING TO CREATE");
+
+        // Static shout out mister David Wang pair programming ftw
+        dict2 = Domains.init();
+        Log.d(TAG, "onCreate: we saved our dict2 lez see wat hapn " + dict2.size());
+        Log.d("onCreate", "onCreate");
     }
 
     // todo why the fuck does my github porNo.js page crash whenever it wants to
@@ -187,7 +198,10 @@ public class MyAccessibilityService extends AccessibilityService {
                 return;
             }
 
+            // Else, let's check this out
+            String host = getHostName(txt);
             Log.d(TAG, "dfs: the URL is " + txt);
+            Log.d(TAG, "dfs: the URL, thru URI, is " + host);
 
             // Is the txt a banned URL?
             if (porNo.isPorn(txt)) {
@@ -270,6 +284,29 @@ public class MyAccessibilityService extends AccessibilityService {
 //        Log.d("dawg", url);
 
         return url;
+    }
+
+    // Thank you, https://stackoverflow.com/questions/23079197/extract-host-name-domain-name-from-url-string/23079402
+    public String getHostName(String url) {
+        URI uri = null;
+        try {
+            uri = new URI(url);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            return url;
+        }
+
+        String hostName = uri.getHost();
+
+        // If null, return the original url
+        if (hostName == null) {
+            return url;
+        }
+        else if (hostName.contains("www.")) {
+            hostName = hostName.substring(4);
+        }
+
+        return hostName;
     }
 
 

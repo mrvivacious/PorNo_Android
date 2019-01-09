@@ -14,9 +14,7 @@ import java.util.Map;
 
 public class porNo {
     private static String TAG = "dawg";
-
     // read me https://stackoverflow.com/questions/4833480/have-i-reached-the-limits-of-the-size-of-objects-javascript-in-my-browser-can-ha
-
 
     /*
      * Function isPorn
@@ -26,6 +24,8 @@ public class porNo {
      * @param url The url whose domain name we check against the porn sites
      */
     public static boolean isPorn(String url) {
+        Map<String, Boolean> dict2 = MyAccessibilityService.dict2;
+
         // Strip mobile. or m.
         int stop = url.length();
         url = url.trim().toLowerCase();
@@ -43,20 +43,24 @@ public class porNo {
         }
 
 
-
         // Avoid fightthenewdrug and github
         if (!url.contains("fightthenewdrug") && !url.contains("github")) {
 //            Log.d(TAG, "isPorn: URL = " + url);
 
             // O(n) worst case feels bad but whO(l)esome porn-checker feels good
-            for (int i = 0; i < pornLinks.length; i++) {
-                if (url.contains(pornLinks[i])) {
-                    // GET THE FUCK OUTTTTTTTTTTTTTTT
-//                    Log.d(TAG, "isPorn: TRUE");
-
-                    return true;
-                }
+            if (dict2.get(url) != null) {
+                return true;
             }
+
+
+//            for (int i = 0; i < Domains.domains.length; i++) {
+//                if (url.contains(Domains.domains[i])) {
+//                    // GET THE FUCK OUTTTTTTTTTTTTTTT
+////                    Log.d(TAG, "isPorn: TRUE");
+//
+//                    return true;
+//                }
+//            }
         }
 
         // Inconclusive
@@ -64,6 +68,9 @@ public class porNo {
     }
 
     public static boolean isPornDomain(String url) {
+        long old = System.currentTimeMillis();
+        Map<String, Boolean> dict2 = MyAccessibilityService.dict2;
+
         // Strip mobile. or m.
         int stop = url.length();
         url = url.trim().toLowerCase();
@@ -84,17 +91,28 @@ public class porNo {
 
         // Avoid fightthenewdrug and github
         else {
-            Log.d(TAG, "isPorn: URL = " + url);
+            url = url.substring(1);
+            url = url.substring(0, url.length() - 1);
+
+            Log.d(TAG, "isPornDomain: URL = " + url);
 
             // O(n) worst case feels bad but whO(l)esome porn-checker feels good
-            for (int i = 0; i < pornDomains.length; i++) {
-                if (url.contains(pornDomains[i])) {
-                    // GET THE FUCK OUTTTTTTTTTTTTTTT
-//                    Log.d(TAG, "isPorn: TRUE");
+            Log.d(TAG, "isPornDomain: dict2.size = " + dict2.size());
 
-                    return true;
-                }
+            Log.d(TAG, "isPornDomain: dict2 " + dict2.get(url));
+            if (dict2.get(url) != null) {
+                Log.d(TAG, "isPornDomain: only took " + (old - System.currentTimeMillis()));
+                return true;
             }
+
+//            for (int i = 0; i < Domains.domains.length; i++) {
+//                if (url.contains(Domains.domains[i])) {
+//                    // GET THE FUCK OUTTTTTTTTTTTTTTT
+////                    Log.d(TAG, "isPorn: TRUE");
+//
+//                    return true;
+//                }
+//            }
         }
 
         // Inconclusive
@@ -905,13 +923,16 @@ public class porNo {
         "hdpornt.com", "kink.com", "milffox.com", "mypornstarbook.com", "xshare.com"
     };
 
-//    static Map<String, Boolean> dict = new HashMap<String, Boolean>();
-//
-//
-//    public static void init() {
-//        for (int i = 0; i < pornLinks.length; i++) {
-//            dict.put(pornLinks[i],true);
-//        }
-//    }
+    static Map<String, Boolean> dict = new HashMap<String, Boolean>();
+
+
+    public static Map<String, Boolean> init() {
+        Log.d(TAG, "porNo: init was called");
+
+        for (String pornLink : pornLinks) {
+            dict.put(pornLink, true);
+        }
+        return dict;
+    }
 
 }
