@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class Domains {
     static Map<String, Boolean> dict = new HashMap<String, Boolean>();
-    static String TAG = "Domains";
+    static String TAG = "dawgDomains";
 
     public static Map<String, Boolean> init() {
         Log.d(TAG, "hi we are about to init lol");

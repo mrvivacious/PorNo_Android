@@ -27,12 +27,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 // Todo:
-// "chrome://bookmarks" triggers redirection | RE: it wasn't chrome://bookmarks, it was the URL to Chrome PorNo! lmao
 
 // BIG THANK YOUs TO https://stackoverflow.com/questions/38783205/android-read-google-chrome-url-using-accessibility-service
 // and https://stackoverflow.com/questions/42125940/how-to-use-accessibility-services-for-taking-action-for-users
 public class MyAccessibilityService extends AccessibilityService {
-    static Map<String, Boolean> dict2 = new HashMap<String, Boolean>();;
+    static Map<String, Boolean> dict2 = new HashMap<>();
+
+    static boolean isFound = false;
+    static String currURL;
 
     static String TAG = "dawgAccessibility";
     private String omnibox = "zz";
@@ -41,7 +43,6 @@ public class MyAccessibilityService extends AccessibilityService {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d(TAG, "onCreate: ATTEMPTING TO CREATE");
 
         // Static shout out mister David Wang pair programming ftw
         dict2 = Domains.init();
@@ -49,16 +50,15 @@ public class MyAccessibilityService extends AccessibilityService {
         Log.d("onCreate", "onCreate");
     }
 
-    // todo why the fuck does my github porNo.js page crash whenever it wants to
+    // todo clicking hyperlink from google results page bypasses algo
+    // todo and so does using the back button to move backwards after having been redirected
     // https://stackoverflow.com/questions/38783205/android-read-google-chrome-url-using-accessibility-service
     public void onAccessibilityEvent(AccessibilityEvent event) {
-//        Log.d(TAG, "onAccessibilityEvent: event = " + event);
-//                Log.d(TAG, "onAccessibilityEvent: className = " + event.getClassName());
 
+        // Chrome support
         if (event.getPackageName() != null && event.getPackageName().toString().contains("com.android.chrome")) {
             String eventType = AccessibilityEvent.eventTypeToString(event.getEventType());
 
-//            time = System.currentTimeMillis();
 //                Log.d(TAG, "onAccessibilityEvent: event = " + event);
 //                Log.d(TAG, "onAccessibilityEvent: className = " + event.getClassName());
 
@@ -86,7 +86,7 @@ public class MyAccessibilityService extends AccessibilityService {
                 if (className.equals("android.widget.EditText")) {
 ////                    // do nothing
 
-//                    Log.d(TAG, "onAccessibilityEvent: inside ET $$$$$$");
+                    Log.d(TAG, "onAccessibilityEvent: inside ET $$$$$$");
                     dfs(event.getSource());
                 }
 
@@ -141,6 +141,7 @@ public class MyAccessibilityService extends AccessibilityService {
 //                        dfs(src);
                     }
 
+                    // Save the resourceID for the omnibox to reduce some cycles
                     // cuz omni not needed to evaluate just text
                     if (event.getSource() != null) {
                         String src = event.getSource().toString();
@@ -188,7 +189,9 @@ public class MyAccessibilityService extends AccessibilityService {
                 return;
             }
 
-            // Ensure we only check the omnibox
+            // If we have a non-zz value for the omnibox AND the current node corresponds to
+            //  the omnibox, then return to prevent rest of dfs -- omnibox gets searched in code more above
+            //
             // If omnibox is zz, it's uninitialized, so proceed with dfs
             // Otherwise, we have a value for omnibox, so this evaluates
             //  to true when we have a node that isn't the omnibox
@@ -200,17 +203,39 @@ public class MyAccessibilityService extends AccessibilityService {
 
             // Else, let's check this out
             String host = getHostName(txt);
+
+            // If we have the redirect url, we can start processing stuff again
+            // Otherwise, check if we are still in the REDIRECTION state
+            Log.d(TAG, "dfs: host -- currURL : " + host + " -- " + currURL);
+            
+            if (host.equals(currURL)) {
+                Log.d(TAG, "dfs: host does equal currURL");
+                isFound = false;
+            }
+            if (isFound) {
+                Log.d(TAG, "dfs: isFound evaluated to true yoooooo");
+                return;
+            }
+
             Log.d(TAG, "dfs: the URL is " + txt);
             Log.d(TAG, "dfs: the URL, thru URI, is " + host);
+            Log.d(TAG, "isFound = " + isFound);
+
+
 
             // Is the txt a banned URL?
-            if (porNo.isPorn(txt)) {
+            if (porNo.isPorn(host)) {
+                isFound = true;
+
 //                Log.d(TAG, "dfs: source info =  " + info);
 
 //            if (txt.equals("yahoo.com")) {
 
                     // Attempting direct redirection
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(getRandomURL()));
+                    String randomURL = getRandomURL();
+                    currURL = getHostName(randomURL);
+
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(randomURL));
 
                     // Will this open in the current tab -- yes, but not before the porn site finishes loading smh
                     // about:blank can be thought of as window.stop()
@@ -268,7 +293,7 @@ public class MyAccessibilityService extends AccessibilityService {
         try {
             items = new ArrayList<String>(FileUtils.readLines(todoFile));
         } catch (IOException ioe) {
-            return "https://fightthenewdrug.com";
+            return "http://fightthenewdrug.org";
         }
 
 //        Log.d("dawg", items.toString());
@@ -288,7 +313,8 @@ public class MyAccessibilityService extends AccessibilityService {
 
     // Thank you, https://stackoverflow.com/questions/23079197/extract-host-name-domain-name-from-url-string/23079402
     public String getHostName(String url) {
-        URI uri = null;
+        URI uri;
+
         try {
             uri = new URI(url);
         } catch (URISyntaxException e) {
@@ -304,6 +330,13 @@ public class MyAccessibilityService extends AccessibilityService {
         }
         else if (hostName.contains("www.")) {
             hostName = hostName.substring(4);
+        }
+
+        if (hostName.contains("mobile.")) {
+            return hostName.substring(7);
+        }
+        else if (hostName.contains("m.")) {
+            return hostName.substring(2);
         }
 
         return hostName;
