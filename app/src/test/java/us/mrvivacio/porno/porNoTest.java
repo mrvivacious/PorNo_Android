@@ -6,13 +6,13 @@ import static org.junit.Assert.*;
 
 public class porNoTest {
 
+    // isPorn() is sent URL hostnames, so test with those only
     @Test
     public void isPorn() {
         boolean malformedURL = porNo.isPorn("pornhub com");
-        boolean isPornLongURL = porNo.isPorn("bangbros.com/here&is&some&filler&text/lmao.html");
+
 
         assertFalse(malformedURL);
-        assertTrue(isPornLongURL);
     }
 
     @Test

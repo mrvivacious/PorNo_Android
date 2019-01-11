@@ -4,14 +4,6 @@
 
 package us.mrvivacio.porno;
 
-import android.content.Intent;
-import android.net.Uri;
-import android.provider.Browser;
-import android.util.Log;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.HashMap;
 import java.util.Map;
 
 public class porNo {
@@ -45,12 +37,10 @@ public class porNo {
 
         // Avoid fightthenewdrug and github
         if (!url.contains("fightthenewdrug") && !url.contains("github")) {
-//            url = getHostName(url);
-            Log.d(TAG, "isPorn: URL = " + url);
-            Log.d(TAG, "isPorn: dict2 get = " + dict2.get(url));
+//            Log.d(TAG, "isPorn: URL = " + url);
+//            Log.d(TAG, "isPorn: dict2 get = " + dict2.get(url));
 
-
-            // O(n) worst case feels bad but whO(l)esome porn-checker feels good
+            // O(1)
             if (dict2.get(url) != null) {
                 return true;
             }
@@ -62,18 +52,14 @@ public class porNo {
     }
 
     public static boolean isPornDomain(String url) {
-        long old = System.currentTimeMillis();
         Map<String, Boolean> dict2 = MyAccessibilityService.dict2;
 
-        // Strip mobile. or m.
-        int stop = url.length();
         url = url.trim().toLowerCase();
 
         // 4 because p.co (example) could be a real porn site and don't wanna skip those
         if (url.length() < 4) {
             return false;
         }
-
 
         // Return false for these URLs to avoid disrupting browsing experience
         // ie trying to look at porNo.js on my Github shouldn't trigger lmao
@@ -82,23 +68,22 @@ public class porNo {
                 url.contains("chrome")   ) {
             return false;
         }
-
-        // Avoid fightthenewdrug and github
+        // Lez keep going
         else {
-            url = url.substring(1);
-            url = url.substring(0, url.length() - 1);
+            if (url.contains("www.")) {
+                url = url.substring(4);
+            }
 
-            Log.d(TAG, "isPornDomain: URL = " + url);
+//            Log.d(TAG, "isPornDomain: URL = " + url);
+//            Log.d(TAG, "isPornDomain: dict2 " + dict2.get(url));
 
-            // O(n) worst case feels bad but whO(l)esome porn-checker feels good
-            Log.d(TAG, "isPornDomain: dict2.size = " + dict2.size());
-
-            Log.d(TAG, "isPornDomain: dict2 " + dict2.get(url));
+            // O(1)
             if (dict2.get(url) != null) {
-                Log.d(TAG, "isPornDomain: only took " + (old - System.currentTimeMillis()));
+//                Log.d(TAG, "isPornDomain: only took " + (old - System.currentTimeMillis()));
                 return true;
             }
 
+            // O(n) worst case feels bad but whO(l)esome porn-checker feels good
 //            for (int i = 0; i < Domains.domains.length; i++) {
 //                if (url.contains(Domains.domains[i])) {
 //                    // GET THE FUCK OUTTTTTTTTTTTTTTT
@@ -111,28 +96,6 @@ public class porNo {
 
         // Inconclusive
         return false;
-    }
-
-    public static String getHostName(String url) {
-        URI uri = null;
-        try {
-            uri = new URI(url);
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-            return url;
-        }
-
-        String hostName = uri.getHost();
-
-        // If null, return the original url
-        if (hostName == null) {
-            return url;
-        }
-        else if (hostName.contains("www.")) {
-            hostName = hostName.substring(4);
-        }
-
-        return hostName;
     }
 
 }

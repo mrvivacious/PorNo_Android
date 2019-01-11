@@ -38,7 +38,6 @@ public class MyAccessibilityService extends AccessibilityService {
 
     static String TAG = "dawgAccessibility";
     private String omnibox = "zz";
-    private long time;
 
     @Override
     public void onCreate() {
@@ -47,11 +46,11 @@ public class MyAccessibilityService extends AccessibilityService {
         // Static shout out mister David Wang pair programming ftw
         dict2 = Domains.init();
         Log.d(TAG, "onCreate: we saved our dict2 lez see wat hapn " + dict2.size());
-        Log.d("onCreate", "onCreate");
+//        Log.d("onCreate", "onCreate");
     }
 
-    // todo clicking hyperlink from google results page bypasses algo
-    // todo and so does using the back button to move backwards after having been redirected
+    // NAW IT FIXED clicking hyperlink from google results page bypasses algo
+    // NAW IT FIXED and so does using the back button to move backwards after having been redirected
     // https://stackoverflow.com/questions/38783205/android-read-google-chrome-url-using-accessibility-service
     public void onAccessibilityEvent(AccessibilityEvent event) {
 
@@ -66,7 +65,6 @@ public class MyAccessibilityService extends AccessibilityService {
             if (eventType.contains("WINDOW")) {
                 String className = event.getClassName().toString();
 
-
 //                Log.d(TAG, "onAccessibilityEvent: event = " + event);
 //                Log.d(TAG, "onAccessibilityEvent: className = " + className);
 
@@ -80,7 +78,7 @@ public class MyAccessibilityService extends AccessibilityService {
                 // ## = detects in incognito
                 // ** = redirects in incognito
 
-                // $$ Clicking a hyperlink on a webpage
+                // $$ Clicking a hyperlink on a webpage ## **
                 // $$ ^^ Navigating using Android back button ## ^^ COULD BE FASTER
                 // $$ ^^ Navigating using Chrome forward navigation button ## ^^ COULD BE FASTER
                 if (className.equals("android.widget.EditText")) {
@@ -92,8 +90,6 @@ public class MyAccessibilityService extends AccessibilityService {
 
                 // $$ ^^ Hyperlink from external source, such as an sms msg (Can't test for incognito -- no
                 //  "Open in incognito" option exists, that I've seen so far, thus we will say this is correct)
-                // COULD BE FASTER
-                // Triggers even when porn url is in the body of a website :O
                 if (className.equals("org.chromium.chrome.browser.ChromeTabbedActivity")) {
 //                    Log.d(TAG, "onAccessibilityEvent: event = " + event);
 //
@@ -115,7 +111,6 @@ public class MyAccessibilityService extends AccessibilityService {
                     dfs(event.getSource());
                 }
             }
-
             // If the user is typing in the omnibox,
             else if (eventType.contains("TYPE_VIEW_TEXT")) {
                 String text = event.getText().toString();
@@ -129,6 +124,9 @@ public class MyAccessibilityService extends AccessibilityService {
                         text = text.replaceAll(" ", "");
                     }
 
+                    text = text.substring(1, text.length() - 1);
+                    text = getHostName(text);
+
                     Log.d(TAG, "onAccessibilityEvent: our text is " + text);
 
                     if (porNo.isPornDomain(text)) {
@@ -138,7 +136,6 @@ public class MyAccessibilityService extends AccessibilityService {
                         startActivity(intent);
 
 //                        Log.d(TAG, "dfs: Speed = " + (System.currentTimeMillis() - time));
-//                        dfs(src);
                     }
 
                     // Save the resourceID for the omnibox to reduce some cycles
@@ -154,8 +151,6 @@ public class MyAccessibilityService extends AccessibilityService {
 //                            Log.d(TAG, "onAccessibilityEvent: UPDATE -- " + omnibox);
                             omnibox = current;
                         }
-
-//                        Log.d(TAG, "onAccessibilityEvent: from TYPE_VIEW_TEXT: " + event.getSource());
                     }
                 }
             }
@@ -221,8 +216,6 @@ public class MyAccessibilityService extends AccessibilityService {
             Log.d(TAG, "dfs: the URL, thru URI, is " + host);
             Log.d(TAG, "isFound = " + isFound);
 
-
-
             // Is the txt a banned URL?
             if (porNo.isPorn(host)) {
                 isFound = true;
@@ -237,20 +230,14 @@ public class MyAccessibilityService extends AccessibilityService {
 
                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(randomURL));
 
-                    // Will this open in the current tab -- yes, but not before the porn site finishes loading smh
-                    // about:blank can be thought of as window.stop()
-                    // Thank you, https://android.stackexchange.com/questions/189074/android-chrome-browser-how-to-make-it-always-open-to-blank-page-and-new-tab-o
+
                     // First, we "stop" the page load of the porn site....
                 // Why is hugesex.tv so fucking fast wtffffff
-                // Todo: Clicking the back button to visit a porn site completely bypasses our url detection
+                // NAW FIXEDDDDD: Clicking the back button to visit a porn site completely bypasses our url detection
                 // fuck u stop watching porn >:(
-//                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("about:blank"));
                     intent.putExtra(Browser.EXTRA_APPLICATION_ID, "com.android.chrome");
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);
-
-//                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(getRandomURL()));
-//                startActivity(intent);
 
 
 //                    Log.d(TAG, "dfs: Speed = " + (System.currentTimeMillis() - time));
@@ -332,6 +319,7 @@ public class MyAccessibilityService extends AccessibilityService {
             hostName = hostName.substring(4);
         }
 
+        // Fuck you websites that use mobile prefix and break my hashmap
         if (hostName.contains("mobile.")) {
             return hostName.substring(7);
         }
@@ -347,41 +335,3 @@ public class MyAccessibilityService extends AccessibilityService {
     public void onInterrupt() {
     }
 }
-
-
-//    // View the actions
-//    // URLs embedded on the page do not have (hoping) the ACTION_SELECT
-//    List<AccessibilityNodeInfo.AccessibilityAction> actions = info.getActionList();
-//
-//// Iterate through our actions and look for the ACTION_SELECT
-//                for (int i = 0; i < actions.size(); i++) {
-//        String action = actions.get(i).toString();
-//
-//        // Seems like we found our action...which means we have our page url...print the url
-//        if (action.contains(" ACTION_SELECT ")) {
-////                        System.out.println(txt);
-//        Log.d("dawg", "action select");
-//
-//        if (isPorn(txt)) {
-//        Log.d("dawg", "porNo!");
-//
-//        // Put me in my own methoddddddddddd
-//        String randomURL = getRandomURL();
-//
-//        // [From isPorn()]...then we porNo!
-////                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(randomURL));
-////                            intent.putExtra(Browser.EXTRA_APPLICATION_ID, "com.android.chrome");
-////                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-////                            startActivity(intent);
-//
-//        // Thank you, https://stackoverflow.com/questions/2201917/how-can-i-open-a-url-in-androids-web-browser-from-my-application
-//        // How to change url within tab or even close the current tab and open a new one????
-//        // Fast as fuck BUT opens a new tab while the porn tab still exists in the background...how to close the porn tab?
-//        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(randomURL));
-//        startActivity(browserIntent);
-//
-//        }
-//        }
-//        }
-//
-////                System.out.println("ACTIONS:: " + info.getActionList());
