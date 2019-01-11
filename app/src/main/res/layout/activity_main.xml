@@ -110,9 +110,20 @@
         android:layout_height="wrap_content"
         android:text="Add Item"
         android:id="@+id/btn_AddItem"
-        android:layout_alignParentBottom="true"
+        android:layout_above="@id/btn_Emergency"
         android:onClick="onAddItem"
         android:background="@color/colorPrimary"
+        />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Emergency"
+        android:id="@+id/btn_Emergency"
+        android:layout_alignParentBottom="true"
+        android:onClick="onEmergency"
+        android:textColor="@android:color/white"
+        android:background="@android:color/holo_red_dark"
         />
 
 

@@ -7,8 +7,8 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceActivity;
 import android.provider.Settings;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -40,9 +41,6 @@ public class MainActivity extends AppCompatActivity {
         // Thank you for toast lmao: https://stackoverflow.com/questions/3500197/how-to-display-toast-in-android
         if (!isAccessibilitySettingsOn(this)) {
             alertUser();
-
-//            Toast.makeText(this, "Yo ~~ Plz check if PorNo! is on first ~ ",
-//                    Toast.LENGTH_LONG).show();
         }
 
         // Tutorial code
@@ -50,23 +48,18 @@ public class MainActivity extends AppCompatActivity {
         lvItems = (ListView) findViewById(R.id.lv_Items);
         items = new ArrayList<String>();
 
+        // Populate the listView with the link names saved in sharedPref
         initList();
 
         itemsAdapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_list_item_1, items);
 
         lvItems.setAdapter(itemsAdapter);
-        setupListViewListener();
-    }
-
-    // This method opens the accessibility screen
-    public void onEnableAccClick() {
-        Log.d(TAG, "onEnableAccClick: we in here");
-        startActivityForResult(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS), 1);
+        setupTouchListeners();
     }
 
     // Attaches a long click listener
-    private void setupListViewListener() {
+    private void setupTouchListeners() {
         lvItems.setOnItemLongClickListener(
                 new AdapterView.OnItemLongClickListener() {
                     @Override
@@ -103,14 +96,16 @@ public class MainActivity extends AppCompatActivity {
                             return;
                         }
 
-                        // Open the url
-                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(toOpen));
-                        startActivity(browserIntent);
+                        openURL(toOpen);
+
                     }
                 }
         );
     }
 
+
+
+    // Screen the URL and add it if the URL isn't in our porn map
     public void onAddItem(View v) {
         EditText url = findViewById(R.id.et_NewItem);
         EditText name = findViewById(R.id.et_NewItem2);
@@ -139,6 +134,28 @@ public class MainActivity extends AppCompatActivity {
         itemsAdapter.add(nameText);
         url.setText("");
         name.setText("");
+    }
+
+    // Open all the saved URLs
+    public void onEmergency(View v) {
+        ArrayList<String> names = new ArrayList<String>();
+
+        SharedPreferences prefs = this.getPreferences(Context.MODE_PRIVATE);
+        Map<String, ?> allLinks = prefs.getAll();
+
+        for (Map.Entry<String, ?> entry : allLinks.entrySet()) {
+            String URL = entry.getValue().toString();
+            Log.d(TAG, "opening + " + URL);
+
+            openURL(URL);
+        }
+    }
+
+    // Open a URL in a new window
+    private void openURL(String URL) {
+        // Open the url
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(URL));
+        startActivity(browserIntent);
     }
 
     // Return the URL of the passed in name key
@@ -293,7 +310,7 @@ public class MainActivity extends AppCompatActivity {
                 })
                 .setNegativeButton("I'll go there myself", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        // doNothing()
+                        // Do nothing
                     }
                 })
                 .setIcon(android.R.drawable.ic_dialog_alert)
