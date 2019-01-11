@@ -11,7 +11,8 @@
         android:layout_height="wrap_content"
         android:id="@+id/tv_msg"
         android:textAlignment="center"
-        android:text="Let's say no to porno, together! (long press delete, short press go to url)"
+        android:padding="5dp"
+        android:text="Let's say no to porno, together! \nHold to delete, touch to open ~"
         android:textColor="@android:color/black"
         android:background="@color/colorAccent"/>
 
@@ -19,6 +20,7 @@
     <!-- This is an <hr>, essentially -->
     <View
         android:id="@+id/hi"
+        android:paddingBottom="5dp"
         android:layout_width="fill_parent"
         android:layout_height="1dp"
         android:background="#000"
@@ -99,6 +101,7 @@
         android:layout_above="@+id/btn_AddItem"
         android:hint="Name this link?"
         android:textAlignment="center"
+        android:paddingBottom="5dp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:background="@color/colorAccent"

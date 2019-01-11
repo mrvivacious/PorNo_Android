@@ -186,6 +186,7 @@ public class MainActivity extends AppCompatActivity {
 
         Log.d(TAG, "keys  =  " + allLinks.keySet());
 
+        // Thank you, https://stackoverflow.com/questions/22089411/how-to-get-all-keys-of-sharedpreferences-programmatically-in-android
         for (Map.Entry<String, ?> entry : allLinks.entrySet()) {
             String name = entry.getKey();
             String URL = entry.getValue().toString();
