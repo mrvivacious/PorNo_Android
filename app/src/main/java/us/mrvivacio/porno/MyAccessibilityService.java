@@ -275,7 +275,7 @@ public class MyAccessibilityService extends AccessibilityService {
 
         // No URLs saved, so show my Medium article lmfao
         if (size == 0) {
-            return "www.fightthenewdrug.org";
+            return "https://medium.com/@vivekbhookya/porno-de97189d82f6";
         }
 
         int random = (int) Math.floor(Math.random() * MainActivity.URLs.size());
@@ -287,11 +287,6 @@ public class MyAccessibilityService extends AccessibilityService {
 
     // Thank you, https://stackoverflow.com/questions/23079197/extract-host-name-domain-name-from-url-string/23079402
     public static String getHostName(String url) {
-        // Fuck you specifically
-        if (url.contains("hugesex.tv")) {
-            return "hugesex.tv";
-        }
-
         URI uri;
 
         try {

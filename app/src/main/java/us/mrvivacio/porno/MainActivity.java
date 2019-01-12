@@ -140,38 +140,6 @@ public class MainActivity extends AppCompatActivity {
         );
     }
 
-
-    // Screen the URL and add it if the URL isn't in our porn map
-    public void onAddItem(View v) {
-        EditText url = findViewById(R.id.et_NewItem);
-        EditText name = findViewById(R.id.et_NewItem2);
-
-        String urlText = url.getText().toString().trim();
-        String nameText = name.getText().toString().trim();
-
-        if (porNo.isPorn(getHostName(urlText))) {
-            // tf u doing
-            Toast.makeText(this, "That link isn't going to work, sorry.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (urlText.length() < 1) {
-            // No link? No action
-            return;
-        }
-        else if (nameText.length() < 1) {
-            // No name provided? Use the url as the name
-            nameText = urlText;
-        }
-
-        // Save this link to Shared Preferences
-        writeItems(nameText, urlText);
-
-        itemsAdapter.add(nameText);
-        url.setText("");
-        name.setText("");
-    }
-
     // Open all the saved URLs
     public void onEmergency(View v) {
         ArrayList<String> names = new ArrayList<String>();
@@ -357,8 +325,41 @@ public class MainActivity extends AppCompatActivity {
                 .show();
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////// CORRESPONDS TO ACTION BAR MENU /////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    /// CORRESPONDS TO ACTION BAR MENU ///
+    // Screen the URL and add it if the URL isn't in our porn map
+    public void onAddItem(View v) {
+        EditText url = findViewById(R.id.et_NewItem);
+        EditText name = findViewById(R.id.et_NewItem2);
+
+        String urlText = url.getText().toString().trim();
+        String nameText = name.getText().toString().trim();
+
+        if (porNo.isPorn(getHostName(urlText))) {
+            // tf u doing
+            Toast.makeText(this, "That link isn't going to work, sorry.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (urlText.length() < 1) {
+            // No link? No action
+            return;
+        }
+        else if (nameText.length() < 1) {
+            // No name provided? Use the url as the name
+            nameText = urlText;
+        }
+
+        // Save this link to Shared Preferences
+        writeItems(nameText, urlText);
+
+        itemsAdapter.add(nameText);
+        url.setText("");
+        name.setText("");
+    }
+
     public void newToast(MenuItem item) {
         Toast.makeText(this, "testing", Toast.LENGTH_LONG).show();
     }
@@ -371,9 +372,9 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, "firebase stuff", Toast.LENGTH_LONG).show();
     }
 
-
+    // Open the site corresponding to the Chrome extension
     public void openChrome(MenuItem item) {
-        Toast.makeText(this, "open chrome page", Toast.LENGTH_LONG).show();
+        openURL("https://chrome.google.com/webstore/detail/porno-beta/fkhfpbfakkjpkhnonhelnnbohblaeooj");
     }
 
     public void showAbout(MenuItem item) {
