@@ -8,7 +8,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -19,11 +18,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
-import android.widget.Toolbar;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -33,10 +30,16 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "dawg";
     private ArrayList<String> items;
-    public static ArrayList<String> URLs;
 
     private ArrayAdapter<String> itemsAdapter;
     private ListView lvItems;
+
+    // This holds the redirect links for MyAccessibilityService to refer to
+    public static ArrayList<String> URLs;
+
+    // This holds the latest porn domains from database
+    public static ArrayList<String> realtimeBannedLinks = new ArrayList<String>();
+
 
     // Thank you, https://stackoverflow.com/questions/39052127/how-to-add-an-actionbar-in-android-studio-for-beginners
     @Override
@@ -44,29 +47,6 @@ public class MainActivity extends AppCompatActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.toolbar, menu);
         return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-//            case R.id.a:
-//                //Write your code
-//                return true;
-//            case R.id.b:
-//                //Write your code
-//                return true;
-//            case R.id.c:
-//                //Write your code
-//                return true;
-//            case R.id.d:
-//                //Write your code
-//                return true;
-//            case R.id.e:
-//                //Write your code
-//                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
     }
 
     @Override
@@ -369,7 +349,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void updateLinks(MenuItem item) {
-        Toast.makeText(this, "firebase stuff", Toast.LENGTH_LONG).show();
+
     }
 
     // Open the site corresponding to the Chrome extension
