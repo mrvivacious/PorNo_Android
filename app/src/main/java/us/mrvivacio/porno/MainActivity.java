@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Log.d(TAG, "onCreate: db = " + db);
+//        Log.d(TAG, "onCreate: db = " + db);
 
         // if on data or on wifi ?
         readDB();
@@ -388,9 +388,6 @@ public class MainActivity extends AppCompatActivity {
         name.setText("");
     }
 
-    public void newToast(MenuItem item) {
-        Toast.makeText(this, "testing", Toast.LENGTH_LONG).show();
-    }
 
     public void showInfo(MenuItem item) {
         Toast.makeText(this, "Showing info", Toast.LENGTH_LONG).show();
@@ -408,6 +405,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void showAbout(MenuItem item) {
-        Toast.makeText(this, "about page open", Toast.LENGTH_LONG).show();
+        Intent intent = new Intent(this, about.class);
+        startActivity(intent);
     }
 }
