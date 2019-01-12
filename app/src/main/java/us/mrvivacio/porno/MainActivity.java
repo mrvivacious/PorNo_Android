@@ -23,12 +23,16 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -40,7 +44,7 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "dawg";
     private ArrayList<String> items;
-
+    private AdView adView;
     private ArrayAdapter<String> itemsAdapter;
     private ListView lvItems;
 
@@ -66,7 +70,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 //        Log.d(TAG, "onCreate: db = " + db);
-        MobileAds.initialize(this, "ca-app-pub-5951616110625427~9020966946");
+        MobileAds.initialize(this, "ca-app-pub-3940256099942544/6300978111");
+
+        adView = findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        adView.loadAd(adRequest);
 
         // if on data or on wifi ?
         readDB();
