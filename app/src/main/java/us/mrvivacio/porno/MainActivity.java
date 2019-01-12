@@ -388,7 +388,7 @@ public class MainActivity extends AppCompatActivity {
         name.setText("");
     }
 
-
+    // TODO: todo
     public void showInfo(MenuItem item) {
         Toast.makeText(this, "Showing info", Toast.LENGTH_LONG).show();
     }
@@ -404,6 +404,7 @@ public class MainActivity extends AppCompatActivity {
         openURL("https://chrome.google.com/webstore/detail/porno-beta/fkhfpbfakkjpkhnonhelnnbohblaeooj");
     }
 
+    // Open the About PorNo! page
     public void showAbout(MenuItem item) {
         Intent intent = new Intent(this, about.class);
         startActivity(intent);

@@ -26,6 +26,9 @@
             <meta-data
                 android:name="android.accessibilityservice"
                 android:resource="@xml/serviceconfig" />
+            <meta-data
+                android:name="com.google.android.gms.ads.APPLICATION_ID"
+                android:value="ca-app-pub-5951616110625427~9020966946"/>
         </service>
 
         <activity android:name=".about"></activity>
