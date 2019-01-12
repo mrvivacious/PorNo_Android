@@ -21,7 +21,7 @@ android {
 dependencies {
     implementation 'com.google.firebase:firebase-core:16.0.6'
     implementation 'com.google.firebase:firebase-firestore:17.1.5'
-//    implementation 'com.google.android.gms:play-services-ads:17.1.2'
+    implementation 'com.google.firebase:firebase-ads:17.1.2'
 
 
 
