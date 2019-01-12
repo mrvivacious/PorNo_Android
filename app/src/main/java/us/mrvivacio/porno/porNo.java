@@ -4,6 +4,8 @@
 
 package us.mrvivacio.porno;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Map;
 
 public class porNo {
@@ -41,7 +43,8 @@ public class porNo {
 //            Log.d(TAG, "isPorn: dict2 get = " + dict2.get(url));
 
             // O(1)
-            if (dict2.get(url) != null) {
+            if (    dict2.get(url) != null ||
+                    MainActivity.realtimeBannedLinks.get(url) != null) {
                 return true;
             }
 
@@ -78,7 +81,8 @@ public class porNo {
 //            Log.d(TAG, "isPornDomain: dict2 " + dict2.get(url));
 
             // O(1)
-            if (dict2.get(url) != null) {
+            if (    dict2.get(url) != null ||
+                    MainActivity.realtimeBannedLinks.get(url) != null) {
 //                Log.d(TAG, "isPornDomain: only took " + (old - System.currentTimeMillis()));
                 return true;
             }

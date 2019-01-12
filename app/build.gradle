@@ -19,7 +19,8 @@ android {
 }
 
 dependencies {
-    implementation 'com.google.firebase:firebase-core:16.0.1'
+    implementation 'com.google.firebase:firebase-core:16.0.6'
+    implementation 'com.google.firebase:firebase-firestore:17.1.5'
 
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])

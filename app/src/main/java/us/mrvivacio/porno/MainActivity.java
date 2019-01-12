@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -22,9 +23,17 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
@@ -38,8 +47,9 @@ public class MainActivity extends AppCompatActivity {
     public static ArrayList<String> URLs;
 
     // This holds the latest porn domains from database
-    public static ArrayList<String> realtimeBannedLinks = new ArrayList<String>();
+    public static Map<String, Boolean> realtimeBannedLinks = new HashMap<>();
 
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     // Thank you, https://stackoverflow.com/questions/39052127/how-to-add-an-actionbar-in-android-studio-for-beginners
     @Override
@@ -53,6 +63,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Log.d(TAG, "onCreate: db = " + db);
+
+        // if on data or on wifi ?
+        readDB();
 
         // Remind user to enable PorNo! service
         // Thank you for toast lmao: https://stackoverflow.com/questions/3500197/how-to-display-toast-in-android
@@ -118,6 +133,39 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
         );
+    }
+
+    // Update local links with the links from the database
+    private void readDB() {
+        // Thank you, https://firebase.google.com/docs/firestore/query-data/get-data#list_subcollections_of_a_document
+        DocumentReference docRef = db.collection("links").document("realtimeBannedLinks");
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        String bannedLinks = document.getData().toString();
+                        bannedLinks = bannedLinks.substring(6);
+                        bannedLinks = bannedLinks.substring(0, bannedLinks.length() - 2);
+
+                        Log.d(TAG, bannedLinks);
+
+                        // Thank you, https://stackoverflow.com/questions/7347856/how-to-convert-a-string-into-an-arraylist
+                        ArrayList<String> banList =  new ArrayList<String>(Arrays.asList(bannedLinks.split(", ")));
+
+                        for (String link : banList) {
+                            realtimeBannedLinks.put(link, true);
+                        }
+
+                    } else {
+                        Log.d(TAG, "No such document");
+                    }
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
+                }
+            }
+        });
     }
 
     // Open all the saved URLs
@@ -348,8 +396,10 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, "Showing info", Toast.LENGTH_LONG).show();
     }
 
+    // Read from database, update banList, toast
     public void updateLinks(MenuItem item) {
-
+        readDB();
+        Toast.makeText(this, "Synced with database", Toast.LENGTH_LONG).show();
     }
 
     // Open the site corresponding to the Chrome extension
