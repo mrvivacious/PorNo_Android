@@ -13,6 +13,9 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -20,6 +23,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -29,8 +33,41 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "dawg";
     private ArrayList<String> items;
+    public static ArrayList<String> URLs;
+
     private ArrayAdapter<String> itemsAdapter;
     private ListView lvItems;
+
+    // Thank you, https://stackoverflow.com/questions/39052127/how-to-add-an-actionbar-in-android-studio-for-beginners
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.toolbar, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+//            case R.id.a:
+//                //Write your code
+//                return true;
+//            case R.id.b:
+//                //Write your code
+//                return true;
+//            case R.id.c:
+//                //Write your code
+//                return true;
+//            case R.id.d:
+//                //Write your code
+//                return true;
+//            case R.id.e:
+//                //Write your code
+//                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,7 +139,6 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
     }
-
 
 
     // Screen the URL and add it if the URL isn't in our porn map
@@ -180,6 +216,7 @@ public class MainActivity extends AppCompatActivity {
     // Get keys from Shared Preferences and initialize our list
     private void initList() {
         ArrayList<String> names = new ArrayList<String>();
+        ArrayList<String> URLList = new ArrayList<String>();
 
         SharedPreferences prefs = this.getPreferences(Context.MODE_PRIVATE);
         Map<String, ?> allLinks = prefs.getAll();
@@ -200,10 +237,12 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "entry.key : val = " + name + " : " + URL);
 
                 names.add(name);
+                URLList.add(URL);      // In order to reference URLs during redirection
             }
         }
 
         items = names;
+        URLs = URLList;
     }
 
     // Save name:url to Shared Preferences
@@ -316,5 +355,28 @@ public class MainActivity extends AppCompatActivity {
                 })
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .show();
+    }
+
+
+    /// CORRESPONDS TO ACTION BAR MENU ///
+    public void newToast(MenuItem item) {
+        Toast.makeText(this, "testing", Toast.LENGTH_LONG).show();
+    }
+
+    public void showInfo(MenuItem item) {
+        Toast.makeText(this, "Showing info", Toast.LENGTH_LONG).show();
+    }
+
+    public void updateLinks(MenuItem item) {
+        Toast.makeText(this, "firebase stuff", Toast.LENGTH_LONG).show();
+    }
+
+
+    public void openChrome(MenuItem item) {
+        Toast.makeText(this, "open chrome page", Toast.LENGTH_LONG).show();
+    }
+
+    public void showAbout(MenuItem item) {
+        Toast.makeText(this, "about page open", Toast.LENGTH_LONG).show();
     }
 }

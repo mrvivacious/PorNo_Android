@@ -9,7 +9,9 @@
 package us.mrvivacio.porno;
 
 import android.accessibilityservice.AccessibilityService;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.provider.Browser;
 import android.util.Log;
@@ -268,38 +270,28 @@ public class MyAccessibilityService extends AccessibilityService {
         return src.substring(start, stop);
     }
 
-
     public String getRandomURL() {
-        File filesDir = getFilesDir();
-        ArrayList<String> items;
+        int size = MainActivity.URLs.size();
 
-//        Log.d("dawg", filesDir.toString());
-        File todoFile = new File(filesDir, "todo.txt");
-
-        // Get our saved urls
-        try {
-            items = new ArrayList<String>(FileUtils.readLines(todoFile));
-        } catch (IOException ioe) {
-            return "http://fightthenewdrug.org";
+        // No URLs saved, so show my Medium article lmfao
+        if (size == 0) {
+            return "www.fightthenewdrug.org";
         }
 
-//        Log.d("dawg", items.toString());
+        int random = (int) Math.floor(Math.random() * MainActivity.URLs.size());
 
-
-        // Select a url at random and parse it
-        int random = (int) Math.floor(Math.random() * items.size());
-
-        String item = items.get(random);
-        int idxPipe = item.indexOf('|');
-        String url = item.substring(0, idxPipe - 1);
-
-//        Log.d("dawg", url);
+        String url = MainActivity.URLs.get(random);
 
         return url;
     }
 
     // Thank you, https://stackoverflow.com/questions/23079197/extract-host-name-domain-name-from-url-string/23079402
-    public String getHostName(String url) {
+    public static String getHostName(String url) {
+        // Fuck you specifically
+        if (url.contains("hugesex.tv")) {
+            return "hugesex.tv";
+        }
+
         URI uri;
 
         try {
@@ -321,10 +313,15 @@ public class MyAccessibilityService extends AccessibilityService {
 
         // Fuck you websites that use mobile prefix and break my hashmap
         if (hostName.contains("mobile.")) {
-            return hostName.substring(7);
+            hostName = hostName.substring(7);
         }
         else if (hostName.contains("m.")) {
-            return hostName.substring(2);
+            hostName = hostName.substring(2);
+        }
+
+        // Fuck you no path allowed
+        if (hostName.contains("/")) {
+            return hostName.substring(0, hostName.indexOf("/"));
         }
 
         return hostName;

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/Toast"
+        android:title="Toast btn"
+        android:onClick="newToast" />
+
+    <item
+        android:id="@+id/howTo"
+        android:title="How to use"
+        android:onClick="showInfo" />
+
+    <item
+        android:id="@+id/action_refresh"
+        android:title="Update links"
+        android:onClick="updateLinks"/>
+
+    <item
+        android:id="@+id/chrome"
+        android:title="Get for Chrome!"
+        android:onClick="openChrome" />
+
+    <item
+        android:id="@+id/about"
+        android:title="About"
+        android:onClick="showAbout" />
+
+</menu>
+
