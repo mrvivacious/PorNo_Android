@@ -70,13 +70,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 //        Log.d(TAG, "onCreate: db = " + db);
-        MobileAds.initialize(this, "ca-app-pub-3940256099942544/6300978111");
+//        MobileAds.initialize(this, "ca-app-pub-3940256099942544/6300978111");
+        MobileAds.initialize(this, "ca-app-pub-5951616110625427~9020966946");
+
 
         adView = findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         adView.loadAd(adRequest);
 
-        // if on data or on wifi ?
+        // update from db
         readDB();
 
         // Remind user to enable PorNo! service
@@ -109,8 +111,6 @@ public class MainActivity extends AppCompatActivity {
                         // DELETE FROM SHARED PREF
                         String name = items.get(pos);
                         deleteItem(name);
-
-                        Log.d(TAG, "deleting : " + items.get(pos));
 
                         // Remove the item within array at position
                         items.remove(pos);
@@ -159,8 +159,6 @@ public class MainActivity extends AppCompatActivity {
                         bannedLinks = bannedLinks.substring(6);
                         bannedLinks = bannedLinks.substring(0, bannedLinks.length() - 2);
 
-                        Log.d(TAG, bannedLinks);
-
                         // Thank you, https://stackoverflow.com/questions/7347856/how-to-convert-a-string-into-an-arraylist
                         ArrayList<String> banList =  new ArrayList<String>(Arrays.asList(bannedLinks.split(", ")));
 
@@ -169,10 +167,10 @@ public class MainActivity extends AppCompatActivity {
                         }
 
                     } else {
-                        Log.d(TAG, "No such document");
+//                        Log.d(TAG, "No such document");
                     }
                 } else {
-                    Log.d(TAG, "get failed with ", task.getException());
+//                    Log.d(TAG, "get failed with ", task.getException());
                 }
             }
         });
@@ -187,7 +185,6 @@ public class MainActivity extends AppCompatActivity {
 
         for (Map.Entry<String, ?> entry : allLinks.entrySet()) {
             String URL = entry.getValue().toString();
-            Log.d(TAG, "opening + " + URL);
 
             openURL(URL);
         }
@@ -227,7 +224,7 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences prefs = this.getPreferences(Context.MODE_PRIVATE);
         Map<String, ?> allLinks = prefs.getAll();
 
-        Log.d(TAG, "keys  =  " + allLinks.keySet());
+//        Log.d(TAG, "keys  =  " + allLinks.keySet());
 
         // Thank you, https://stackoverflow.com/questions/22089411/how-to-get-all-keys-of-sharedpreferences-programmatically-in-android
         for (Map.Entry<String, ?> entry : allLinks.entrySet()) {
@@ -240,8 +237,6 @@ public class MainActivity extends AppCompatActivity {
             }
             // The URL isn't in our porn map, so keep it le mao
             else {
-                Log.d(TAG, "entry.key : val = " + name + " : " + URL);
-
                 names.add(name);
                 URLList.add(URL);      // In order to reference URLs during redirection
             }
@@ -375,6 +370,12 @@ public class MainActivity extends AppCompatActivity {
         String urlText = url.getText().toString().trim();
         String nameText = name.getText().toString().trim();
 
+        // Please
+        if (urlText.contains(" ")) {
+            Toast.makeText(this, "No spaces in URL, please.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         if (porNo.isPorn(getHostName(urlText))) {
             // tf u doing
             Toast.makeText(this, "That link isn't going to work, sorry.", Toast.LENGTH_SHORT).show();
@@ -398,9 +399,29 @@ public class MainActivity extends AppCompatActivity {
         name.setText("");
     }
 
-    // TODO: todo
+    // Show how-to-use info popup
     public void showInfo(MenuItem item) {
-        Toast.makeText(this, "Showing info", Toast.LENGTH_LONG).show();
+        AlertDialog.Builder builder;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            builder = new AlertDialog.Builder(this, android.R.style.Theme_Material_Dialog_Alert);
+        } else {
+            builder = new AlertDialog.Builder(this);
+        }
+
+        // Build the alert
+        builder.setTitle("How to use PorNo!")
+                .setMessage("Add URLs to sites that inspire you and make you feel great and PorNo! will handle the rest!" +
+                        "\nYou can name the URLs for convenience, or leave the name field blank to see the URL." +
+                        "\nClick on a URL to visit it and hold on a URL to delete it." +
+                        "\nThe emergency button opens all your saved URLs. Hopefully this will be enough to overcome any emergencies!" +
+                        "\n\nYou've got what it takes to overcome porn. Good luck ~")
+                .setPositiveButton("Got it ~", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        // doNothing()
+                    }
+                })
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
     }
 
     // Read from database, update banList, toast

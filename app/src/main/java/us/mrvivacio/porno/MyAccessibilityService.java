@@ -40,7 +40,7 @@ public class MyAccessibilityService extends AccessibilityService {
 
         // Static shout out mister David Wang pair programming ftw
         dict2 = Domains.init();
-        Log.d(TAG, "onCreate: we saved our dict2 lez see wat hapn " + dict2.size());
+//        Log.d(TAG, "onCreate: we saved our dict2 lez see wat hapn " + dict2.size());
 //        Log.d("onCreate", "onCreate");
     }
 
@@ -79,7 +79,7 @@ public class MyAccessibilityService extends AccessibilityService {
                 if (className.equals("android.widget.EditText")) {
 ////                    // do nothing
 
-                    Log.d(TAG, "onAccessibilityEvent: inside ET $$$$$$");
+//                    Log.d(TAG, "onAccessibilityEvent: inside ET $$$$$$");
                     dfs(event.getSource());
                 }
 
@@ -122,7 +122,7 @@ public class MyAccessibilityService extends AccessibilityService {
                     text = text.substring(1, text.length() - 1);
                     text = getHostName(text);
 
-                    Log.d(TAG, "onAccessibilityEvent: our text is " + text);
+//                    Log.d(TAG, "onAccessibilityEvent: our text is " + text);
 
                     if (porNo.isPornDomain(text)) {
                         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(getRandomURL()));
@@ -196,20 +196,20 @@ public class MyAccessibilityService extends AccessibilityService {
 
             // If we have the redirect url, we can start processing stuff again
             // Otherwise, check if we are still in the REDIRECTION state
-            Log.d(TAG, "dfs: host -- currURL : " + host + " -- " + currURL);
+//            Log.d(TAG, "dfs: host -- currURL : " + host + " -- " + currURL);
             
             if (host.equals(currURL)) {
-                Log.d(TAG, "dfs: host does equal currURL");
+//                Log.d(TAG, "dfs: host does equal currURL");
                 isFound = false;
             }
             if (isFound) {
-                Log.d(TAG, "dfs: isFound evaluated to true yoooooo");
+//                Log.d(TAG, "dfs: isFound evaluated to true yoooooo");
                 return;
             }
 
-            Log.d(TAG, "dfs: the URL is " + txt);
-            Log.d(TAG, "dfs: the URL, thru URI, is " + host);
-            Log.d(TAG, "isFound = " + isFound);
+//            Log.d(TAG, "dfs: the URL is " + txt);
+//            Log.d(TAG, "dfs: the URL, thru URI, is " + host);
+//            Log.d(TAG, "isFound = " + isFound);
 
             // Is the txt a banned URL?
             if (porNo.isPorn(host)) {
