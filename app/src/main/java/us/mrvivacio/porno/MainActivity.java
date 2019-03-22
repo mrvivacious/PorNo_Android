@@ -1,9 +1,11 @@
 package us.mrvivacio.porno;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -31,8 +33,6 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
     // This holds the latest porn domains from database
     public static Map<String, Boolean> realtimeBannedLinks = new HashMap<>();
 
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    static FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     // Thank you, https://stackoverflow.com/questions/39052127/how-to-add-an-actionbar-in-android-studio-for-beginners
     @Override
@@ -68,6 +68,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Check if we have all of our permissions in place
+        initPermissions();
 
 //        Log.d(TAG, "onCreate: db = " + db);
 //        MobileAds.initialize(this, "ca-app-pub-3940256099942544/6300978111");
@@ -146,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Update local links with the links from the database
-    private void readDB() {
+    public static void readDB() {
         // Thank you, https://firebase.google.com/docs/firestore/query-data/get-data#list_subcollections_of_a_document
         DocumentReference docRef = db.collection("links").document("realtimeBannedLinks");
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -210,14 +213,18 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences prefs = this.getPreferences(Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
 
+        String url = getItem(key);
+
         editor.remove(key);
         editor.apply();
+
+        Utilities.removeFromFile(url);
 
         Toast.makeText(this, key + " was deleted ~", Toast.LENGTH_LONG).show();
     }
 
     // Get keys from Shared Preferences and initialize our list
-    private void initList() {
+    public void initList() {
         ArrayList<String> names = new ArrayList<String>();
         ArrayList<String> URLList = new ArrayList<String>();
 
@@ -244,6 +251,7 @@ public class MainActivity extends AppCompatActivity {
 
         items = names;
         URLs = URLList;
+        Utilities.saveToFile(URLList);
     }
 
     // Save name:url to Shared Preferences
@@ -358,6 +366,34 @@ public class MainActivity extends AppCompatActivity {
                 .show();
     }
 
+    // Function initPermissions
+    // Check for and request the permissions needed for this app to work
+    private void initPermissions() {
+        // Request storage permissions if not yet authorized
+        // Thank you, https://stackoverflow.com/questions/32635704/android-permission-doesnt-work-even-if-i-have-declared-it
+        int PERMISSION_REQUEST_CODE = 1;
+
+        // Request file read/write permissions
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_DENIED) {
+
+//                Log.d("MainActivity", "permission denied to WRTIE EXTERNAL STORAGE - requesting it");
+                String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
+
+                requestPermissions(permissions, PERMISSION_REQUEST_CODE);
+            }
+            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_DENIED) {
+
+//                Log.d("MainActivity", "permission denied to READ EXTERNAL STORAGE - requesting it");
+                String[] permissions = {Manifest.permission.READ_EXTERNAL_STORAGE};
+
+                requestPermissions(permissions, PERMISSION_REQUEST_CODE);
+            }
+        }
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////// CORRESPONDS TO ACTION BAR MENU /////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -391,12 +427,18 @@ public class MainActivity extends AppCompatActivity {
             nameText = urlText;
         }
 
+        if (!urlText.contains("http")) {
+            urlText = "http://" + urlText;
+        }
+
         // Save this link to Shared Preferences
         writeItems(nameText, urlText);
 
         itemsAdapter.add(nameText);
         url.setText("");
         name.setText("");
+
+        Utilities.updateFile(urlText);
     }
 
     // Show how-to-use info popup
@@ -435,9 +477,19 @@ public class MainActivity extends AppCompatActivity {
         openURL("https://chrome.google.com/webstore/detail/porno-beta/fkhfpbfakkjpkhnonhelnnbohblaeooj");
     }
 
+    // Open the site corresponding to the Privacy Policy
+    public void openPolicy(MenuItem item) {
+        openURL("https://github.com/mrvivacious/PRIVACY_POLICY/blob/master/PorNo_privacy_policy.txt");
+    }
+
     // Open the About PorNo! page
     public void showAbout(MenuItem item) {
         Intent intent = new Intent(this, about.class);
         startActivity(intent);
+    }
+
+    // Open the site corresponding to the developer logs
+    public void openDevLogs(MenuItem item) {
+        openURL("https://mrvivacious.github.io/dev/dev_PorNo.html");
     }
 }

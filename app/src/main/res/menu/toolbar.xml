@@ -18,9 +18,19 @@
         android:onClick="openChrome" />
 
     <item
+        android:id="@+id/privacyPolicy"
+        android:title="Privacy Policy"
+        android:onClick="openPolicy" />
+
+    <item
         android:id="@+id/about"
         android:title="About"
         android:onClick="showAbout" />
+
+    <item
+        android:id="@+id/devLogs"
+        android:title="PorNo! dev logs"
+        android:onClick="openDevLogs" />
 
 </menu>
 

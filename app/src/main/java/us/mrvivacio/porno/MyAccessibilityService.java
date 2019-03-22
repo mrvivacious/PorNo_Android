@@ -29,13 +29,14 @@ public class MyAccessibilityService extends AccessibilityService {
     static Map<String, Boolean> dict2 = new HashMap<>();
 
     static boolean isFound = false;
-    static String currURL;
+    static String currURL = "zz";
 
     static String TAG = "dawgAccessibility";
     private String omnibox = "zz";
 
     @Override
     public void onCreate() {
+        MainActivity.readDB();
         super.onCreate();
 
         // Static shout out mister David Wang pair programming ftw
@@ -48,6 +49,7 @@ public class MyAccessibilityService extends AccessibilityService {
     // NAW IT FIXED and so does using the back button to move backwards after having been redirected
     // https://stackoverflow.com/questions/38783205/android-read-google-chrome-url-using-accessibility-service
     public void onAccessibilityEvent(AccessibilityEvent event) {
+//                Log.d(TAG, "onAccessibilityEvent: Looking for touch event = " + event);
 
         // Chrome support
         if (event.getPackageName() != null && event.getPackageName().toString().contains("com.android.chrome")) {
@@ -198,12 +200,12 @@ public class MyAccessibilityService extends AccessibilityService {
             // Otherwise, check if we are still in the REDIRECTION state
 //            Log.d(TAG, "dfs: host -- currURL : " + host + " -- " + currURL);
             
-            if (host.equals(currURL)) {
+            if (host.contains(currURL)) {
 //                Log.d(TAG, "dfs: host does equal currURL");
                 isFound = false;
             }
             if (isFound) {
-//                Log.d(TAG, "dfs: isFound evaluated to true yoooooo");
+//                Log.d(TAG, "dfs: isFound evaluated to true: host - currURL = " + host + " - " + currURL);
                 return;
             }
 
@@ -264,23 +266,13 @@ public class MyAccessibilityService extends AccessibilityService {
     }
 
     public String getRandomURL() {
-        int size = MainActivity.URLs.size();
-
-        // No URLs saved, so show my Medium article lmfao
-        if (size == 0) {
-            return "https://medium.com/@vivekbhookya/porno-de97189d82f6";
-        }
-
-        int random = (int) Math.floor(Math.random() * MainActivity.URLs.size());
-
-        String url = MainActivity.URLs.get(random);
-
-        return url;
+        return Utilities.getRandomURL();
     }
 
     // Thank you, https://stackoverflow.com/questions/23079197/extract-host-name-domain-name-from-url-string/23079402
     public static String getHostName(String url) {
         URI uri;
+//        Log.d(TAG, "getHostName: url = " + url);
 
         try {
             uri = new URI(url);
@@ -312,6 +304,7 @@ public class MyAccessibilityService extends AccessibilityService {
             return hostName.substring(0, hostName.indexOf("/"));
         }
 
+//        Log.d(TAG, "getHostName: url++ = " + hostName);
         return hostName;
     }
 
