@@ -5,7 +5,7 @@
     <item
         android:id="@+id/howTo"
         android:title="How to use"
-        android:onClick="showInfo" />
+        android:onClick="openAlertDialogForInstructions" />
 
     <item
         android:id="@+id/action_refresh"
@@ -15,22 +15,22 @@
     <item
         android:id="@+id/chrome"
         android:title="Get for Chrome!"
-        android:onClick="openChrome" />
+        android:onClick="openUrlForChromeExtension" />
 
     <item
         android:id="@+id/privacyPolicy"
         android:title="Privacy Policy"
-        android:onClick="openPolicy" />
+        android:onClick="openUrlForPrivacyPolicy" />
 
     <item
         android:id="@+id/about"
         android:title="About"
-        android:onClick="showAbout" />
+        android:onClick="openActivityForAboutPorNo" />
 
     <item
-        android:id="@+id/devLogs"
-        android:title="PorNo! dev logs"
-        android:onClick="openDevLogs" />
+        android:id="@+id/gitHub"
+        android:title="PorNo! Source Code"
+        android:onClick="openUrlForGitHub" />
 
 </menu>
 

@@ -1,25 +1,25 @@
 package us.mrvivacio.porno;
 
-import android.support.v7.app.AppCompatActivity;
+import android.app.Activity;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuInflater;
 
-public class about extends AppCompatActivity {
+public class about extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about);
 
-        // Thank you, https://stackoverflow.com/questions/39052127/how-to-add-an-actionbar-in-android-studio-for-beginners
-        getSupportActionBar().setTitle("About PorNo!"); // for set actionbar title
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true); // for add back arrow in action bar
+        // Thank you, https://stackoverflow.com/questions/39052127
+        if (getActionBar() != null) {
+            getActionBar().setTitle("About PorNo!");
+            getActionBar().setDisplayHomeAsUpEnabled(true); // Add back arrow in action bar
+        }
     }
 
-    // Thank you, https://stackoverflow.com/questions/26651602/display-back-arrow-on-toolbar
+    // Thank you, https://stackoverflow.com/questions/26651602
     @Override
-    public boolean onSupportNavigateUp() {
+    public boolean onNavigateUp() {
         onBackPressed();
         return true;
     }

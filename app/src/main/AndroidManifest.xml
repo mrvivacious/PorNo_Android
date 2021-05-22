@@ -34,7 +34,7 @@
                 android:resource="@xml/serviceconfig" />
         </service>
 
-        <activity android:name=".about"></activity>
+        <activity android:name=".about"/>
     </application>
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />

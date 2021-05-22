@@ -4,8 +4,8 @@
 
 package us.mrvivacio.porno;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
+import android.util.Log;
+
 import java.util.Map;
 
 public class porNo {
@@ -20,6 +20,7 @@ public class porNo {
      * @param url The url whose domain name we check against the porn sites
      */
     public static boolean isPorn(String url) {
+        Log.d(TAG, "input url = " + url);
         Map<String, Boolean> dict2 = MyAccessibilityService.dict2;
 
         url = url.trim().toLowerCase();
@@ -36,7 +37,6 @@ public class porNo {
             return false;
         }
 
-
         // Avoid fightthenewdrug and github
         if (!url.contains("fightthenewdrug") && !url.contains("github")) {
 //            Log.d(TAG, "isPorn: URL = " + url);
@@ -47,7 +47,6 @@ public class porNo {
                     MainActivity.realtimeBannedLinks.get(url) != null) {
                 return true;
             }
-
         }
 
         // Inconclusive

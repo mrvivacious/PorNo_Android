@@ -1,6 +1,8 @@
 package us.mrvivacio.porno;
 
 import android.Manifest;
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -10,9 +12,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -27,7 +26,6 @@ import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
@@ -41,7 +39,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity {
+import androidx.annotation.NonNull;
+
+public class MainActivity extends Activity {
     private static final String TAG = "dawg";
     private ArrayList<String> items;
     private AdView adView;
@@ -69,25 +69,21 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Check if we have all of our permissions in place
-        initPermissions();
+        requestStoragePermissionsForSavingUserUrlData();
 
 //        Log.d(TAG, "onCreate: db = " + db);
 //        MobileAds.initialize(this, "ca-app-pub-3940256099942544/6300978111");
-        MobileAds.initialize(this, "ca-app-pub-5951616110625427~9020966946");
-
+//        MobileAds.initialize(this, "ca-app-pub-5951616110625427~9020966946");
 
         adView = findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
-        adView.loadAd(adRequest);
+//        adView.loadAd(adRequest);
 
         // update from db
         readDB();
 
-        // Remind user to enable PorNo! service
-        // Thank you for toast lmao: https://stackoverflow.com/questions/3500197/how-to-display-toast-in-android
         if (!isAccessibilitySettingsOn(this)) {
-            alertUser();
+            openAlertDialogForEnablingPorNoService();
         }
 
         // Tutorial code
@@ -133,16 +129,11 @@ public class MainActivity extends AppCompatActivity {
                     public void onItemClick(AdapterView<?> adapterView, View view, int pos, long l) {
                         // Get the text value of the clicked item and parse the url
                         String text = items.get(pos);
-
                         String toOpen = getItem(text);
 
-                        if (toOpen == null) {
-                            // Lol how did this happen
-                            return;
-                        }
+                        if (toOpen == null) { return; } // How would this happen...?
 
-                        openURL(toOpen);
-
+                        openUrlInBrowser(toOpen);
                     }
                 }
         );
@@ -180,21 +171,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Open all the saved URLs
-    public void onEmergency(View v) {
-        ArrayList<String> names = new ArrayList<String>();
-
+    public void onEmergencyButtonPress(View v) {
         SharedPreferences prefs = this.getPreferences(Context.MODE_PRIVATE);
         Map<String, ?> allLinks = prefs.getAll();
 
         for (Map.Entry<String, ?> entry : allLinks.entrySet()) {
             String URL = entry.getValue().toString();
 
-            openURL(URL);
+            openUrlInBrowser(URL);
         }
     }
 
     // Open a URL in a new window
-    private void openURL(String URL) {
+    private void openUrlInBrowser(String URL) {
         // Open the url
         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(URL));
         startActivity(browserIntent);
@@ -296,8 +285,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // To check if service is enabled
-    // Thank you, https://stackoverflow.com/questions/18094982/detect-if-my-accessibility-service-is-enabled
     private boolean isAccessibilitySettingsOn(Context mContext) {
+        // Thank you, https://stackoverflow.com/questions/18094982/detect-if-my-accessibility-service-is-enabled
         int accessibilityEnabled = 0;
         final String service = getPackageName() + "/" + MyAccessibilityService.class.getCanonicalName();
 
@@ -313,6 +302,7 @@ public class MainActivity extends AppCompatActivity {
 
         TextUtils.SimpleStringSplitter mStringColonSplitter = new TextUtils.SimpleStringSplitter(':');
 
+        // TODO ?? this reporst as true even when accessibility hasnt been enabled yet
         if (accessibilityEnabled == 1) {
             Log.v(TAG, "***ACCESSIBILITY IS ENABLED*** -----------------");
             String settingValue = Settings.Secure.getString(
@@ -337,9 +327,8 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
-    // Explain to user how to enable PorNo!
-    // Thank you, https://stackoverflow.com/questions/2115758/how-do-i-display-an-alert-dialog-on-android
-    private void alertUser() {
+    private void openAlertDialogForEnablingPorNoService() {
+        // Thank you, https://stackoverflow.com/questions/2115758/how-do-i-display-an-alert-dialog-on-android
         AlertDialog.Builder builder;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             builder = new AlertDialog.Builder(this, android.R.style.Theme_Material_Dialog_Alert);
@@ -366,40 +355,26 @@ public class MainActivity extends AppCompatActivity {
                 .show();
     }
 
-    // Function initPermissions
-    // Check for and request the permissions needed for this app to work
-    private void initPermissions() {
-        // Request storage permissions if not yet authorized
+    private void requestStoragePermissionsForSavingUserUrlData() {
         // Thank you, https://stackoverflow.com/questions/32635704/android-permission-doesnt-work-even-if-i-have-declared-it
         int PERMISSION_REQUEST_CODE = 1;
 
-        // Request file read/write permissions
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     == PackageManager.PERMISSION_DENIED) {
-
-//                Log.d("MainActivity", "permission denied to WRTIE EXTERNAL STORAGE - requesting it");
                 String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
-
                 requestPermissions(permissions, PERMISSION_REQUEST_CODE);
             }
             if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
                     == PackageManager.PERMISSION_DENIED) {
-
-//                Log.d("MainActivity", "permission denied to READ EXTERNAL STORAGE - requesting it");
                 String[] permissions = {Manifest.permission.READ_EXTERNAL_STORAGE};
-
                 requestPermissions(permissions, PERMISSION_REQUEST_CODE);
             }
         }
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /////// CORRESPONDS TO ACTION BAR MENU /////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
     // Screen the URL and add it if the URL isn't in our porn map
-    public void onAddItem(View v) {
+    public void onAddItemButtonPress(View v) {
         EditText url = findViewById(R.id.et_NewItem);
         EditText name = findViewById(R.id.et_NewItem2);
 
@@ -441,8 +416,9 @@ public class MainActivity extends AppCompatActivity {
         Utilities.updateFile(urlText);
     }
 
-    // Show how-to-use info popup
-    public void showInfo(MenuItem item) {
+    /////// CORRESPONDS TO ACTION BAR MENU
+
+    public void openAlertDialogForInstructions(MenuItem item) {
         AlertDialog.Builder builder;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             builder = new AlertDialog.Builder(this, android.R.style.Theme_Material_Dialog_Alert);
@@ -468,28 +444,24 @@ public class MainActivity extends AppCompatActivity {
 
     // Read from database, update banList, toast
     public void updateLinks(MenuItem item) {
-        readDB();
-        Toast.makeText(this, "Synced with database", Toast.LENGTH_LONG).show();
+//        readDB();
+        Toast.makeText(this, "Feature coming soon...", Toast.LENGTH_LONG).show();
     }
 
-    // Open the site corresponding to the Chrome extension
-    public void openChrome(MenuItem item) {
-        openURL("https://chrome.google.com/webstore/detail/porno-beta/fkhfpbfakkjpkhnonhelnnbohblaeooj");
+    public void openUrlForChromeExtension(MenuItem item) {
+        openUrlInBrowser("https://chrome.google.com/webstore/detail/porno-porn-blocker-beta/fnfchnplgejcfmphhboehhlpcjnjkomp");
     }
 
-    // Open the site corresponding to the Privacy Policy
-    public void openPolicy(MenuItem item) {
-        openURL("https://github.com/mrvivacious/PRIVACY_POLICY/blob/master/PorNo_privacy_policy.txt");
+    public void openUrlForPrivacyPolicy(MenuItem item) {
+        openUrlInBrowser("https://github.com/mrvivacious/PRIVACY_POLICY/blob/master/PorNo_privacy_policy.txt");
     }
 
-    // Open the About PorNo! page
-    public void showAbout(MenuItem item) {
+    public void openActivityForAboutPorNo(MenuItem item) {
         Intent intent = new Intent(this, about.class);
         startActivity(intent);
     }
 
-    // Open the site corresponding to the developer logs
-    public void openDevLogs(MenuItem item) {
-        openURL("https://mrvivacious.github.io/dev/dev_PorNo.html");
+    public void openUrlForGitHub(MenuItem item) {
+        openUrlInBrowser("https://github.com/mrvivacious/PorNo-_Porn_Blocker");
     }
 }
